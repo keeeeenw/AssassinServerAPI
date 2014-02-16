@@ -2,7 +2,7 @@
 import sqlite3
 import os
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-     render_template, flash
+     render_template, flash, jsonify
 
 # create our little application :)
 app = Flask(__name__)
@@ -40,12 +40,33 @@ def get_db():
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
+def api_verif(dev_key):
+    if dev_key == 't6ra1M77Ei80b35LeV5I55EN7c':
+        return True
+    return False
+
 @app.route('/')
 def show_games():
     db = get_db()
     cur = db.execute('select title, num_player from game order by id desc')
     games = cur.fetchall()
     return render_template('show_games.html', games = games)
+
+@app.route('/api/list_games', methods=['GET'])
+def list_games():
+    if 'dev_key' in request.args:
+        key = request.args['dev_key']
+        if not api_verif(key):
+            abort(401)
+    else:
+        if not session.get('logged_in'):
+            abort(401)
+    db = get_db()
+    cur = db.execute('select id, title, num_player from game order by id desc')
+    dict_games = {}
+    for row in cur:
+        dict_games[str(row[0])] = list(row)[1:]
+    return jsonify(**dict_games)
 
 @app.route('/add', methods=['POST'])
 def add_game():
@@ -88,5 +109,5 @@ def close_db(error):
         g.sqlite_db.close();
 
 if __name__ == '__main__':
-    app.run() # fireup the server
+    app.run(debug=True) # fireup the server
 
