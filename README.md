@@ -13,6 +13,6 @@ Flask Tutorial http://flask.pocoo.org/docs/tutorial/
 You can login using username admin and password default to add new games and new current games
 
 To be implemented:
-When the user call the following API, the server returns the content of Game model as JSON:
-Deploy the app on Google AppEngine
+1. When the user call the following API, the server returns the content of Game model as JSON
+2. Deploy the app on Google AppEngine
 
