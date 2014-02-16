@@ -53,3 +53,6 @@ docs/_build/
 
 #venv related
 venv/
+
+#vim specific
+*.swp
