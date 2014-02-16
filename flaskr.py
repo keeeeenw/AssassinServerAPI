@@ -48,16 +48,16 @@ def show_games():
     return render_template('show_games.html', games = games)
 
 @app.route('/add', methods=['POST'])
-def add_entry():
+def add_game():
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
     # use ? to specify query parameters
-    db.execute('insert into entries (title, num_player) values (?, ?)',
+    db.execute('insert into game (title, num_player) values (?, ?)',
                 [request.form['title'], request.form['num_player']])
     db.commit()
     flash('New game was successfully posted')
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('show_games'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -70,14 +70,14 @@ def login():
         else:
             session['logged_in'] = True
             flash('You were logged in')
-            return redirect(url_for('show_entries'))
+            return redirect(url_for('show_games'))
     return render_template('login.html', error=error)
 
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None) #don't need to check it the key exist
     flash('You were logged out')
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('show_games'))
 
 @app.teardown_appcontext
 def close_db(error):

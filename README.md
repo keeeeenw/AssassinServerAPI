@@ -10,5 +10,7 @@ Flask Tutorial http://flask.pocoo.org/docs/tutorial/
 
 (2) What your code does?
 
-When the user call the following API, the server returns the content of Game model as JSON:
+You can login using username admin and password default to add new games and new current games
+
+# When the user call the following API, the server returns the content of Game model as JSON:
 

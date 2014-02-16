@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in %}
+    <form action="{{ url_for('add_game') }}" method=post class=add-game>
+      <dl>
+        <dt>Title:
+        <dd><input type=text size=30 name=title>
+        <dt>Num of Player:
+        <dd><input type=text size=30 name=num_player>
+        <dd><input type=submit value=add>
+      </dl>
+    </form>
+  {% endif %}
+  <h1> Avaliable Games </h1>
+  <ul class=games>
+  {% for game in games %}
+    <li><h2>{{ game.title }}</h2>
+    number of players: {{ game.num_player|safe }}
+  {% else %}
+    <li><em>Unbelievable.  No entries here so far</em>
+  {% endfor %}
+  </ul>
+{% endblock %}
