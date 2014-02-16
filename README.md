@@ -19,9 +19,9 @@ http://flask.pocoo.org/docs/tutorial/
 
 2. User call the server API, the server returns the content of Game model as JSON.
 
-..* You can access the API using http://127.0.0.1:5000/api/list_games if you are logged in.
+ You can access the API using http://127.0.0.1:5000/api/list_games if you are logged in.
 
-..* You could also use http://127.0.0.1:5000/api/list_games?dev_key=t6ra1M77Ei80b35LeV5I55EN7c
+ You could also use http://127.0.0.1:5000/api/list_games?dev_key=t6ra1M77Ei80b35LeV5I55EN7c
 if you do not want to log into the application
 
 To be implemented:
