@@ -26,5 +26,5 @@ if you do not want to log into the application
 
 To be implemented:
 
-1. Deploy the app on Google AppEngine
+1. Deploy the app on Google AppEngine (See the appengine branch)
 
