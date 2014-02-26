@@ -1,0 +1,97 @@
+from flask import Flask, request, session, g, redirect, url_for, abort, \
+     render_template, flash, jsonify
+from application import app
+from models import Game
+
+def api_verif(dev_key):
+    if dev_key == 't6ra1M77Ei80b35LeV5I55EN7c':
+        return True
+    return False
+
+@app.route('/')
+def show_games():
+
+    #db = get_db()
+    #cur = db.execute('select title, num_player from game order by id desc')
+    #games = cur.fetchall()
+
+    # Getting all the games
+    gs = Game.all()
+
+    # Build dictionary 
+    games = []
+    for g in gs:
+        games.append({'title':str(g.title), 'num_player': int(g.num_player)})
+
+    print(games)
+
+    return render_template('show_games.html', games = games)
+
+@app.route('/api/list_games', methods=['GET'])
+def list_games():
+    if 'dev_key' in request.args:
+        key = request.args['dev_key']
+        if not api_verif(key):
+            abort(401)
+    else:
+        if not session.get('logged_in'):
+            abort(401)
+    # Getting all the games
+    gs = Game.all()
+
+    # Build dictionary 
+    games = {}
+    for g in gs:
+        games[g.title] = g.num_player
+
+    return jsonify(**games)
+
+@app.route('/add', methods=['POST'])
+def add_game():
+    if not session.get('logged_in'):
+        abort(401)
+
+    #db = get_db()
+    ## use ? to specify query parameters
+    #db.execute('insert into game (title, num_player) values (?, ?)',
+    #            [request.form['title'], request.form['num_player']])
+    #db.commit()
+
+    title = request.form['title']
+    num_player = request.form['num_player']
+    g = Game(title=title, num_player=int(num_player))
+    g.put() # save in the database
+
+    flash('New game was successfully posted')
+    return redirect(url_for('show_games'))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != app.config['USERNAME']:
+            error = 'Invalid username'
+        elif request.form['password'] != app.config['PASSWORD']:
+            error = 'Invalid password'
+        else:
+            session['logged_in'] = True
+            flash('You were logged in')
+            return redirect(url_for('show_games'))
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None) #don't need to check it the key exist
+    flash('You were logged out')
+    return redirect(url_for('show_games'))
+
+#@app.teardown_appcontext
+#def close_db(error):
+#    """
+#    Closes the database again at the end of the request.
+#    """
+#    if hasattr(g, 'sqlite_db'):
+#        g.sqlite_db.close();
+
+
