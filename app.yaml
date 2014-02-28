@@ -1,4 +1,4 @@
-application: macassassingame
+application: macassassingamefun 
 version: 1
 runtime: python27
 api_version: 1
@@ -41,3 +41,6 @@ handlers:
 
 - url: .*
   script: run.application.app
+
+- url: /_ah/login_required
+  script: login

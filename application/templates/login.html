@@ -1,7 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
   <h2>Login</h2>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+  {% if 'greeting' in loginInfo %}
+  <p class=error>
+  {{ loginInfo['greeting']}}
+  {% endif %}
+
+  {#
   <form action="{{ url_for('login') }}" method=post>
     <dl>
       <dt>Username:
@@ -11,4 +17,12 @@
       <dd><input type=submit value=Login>
     </dl>
   </form>
+  #}
+
+  {% if 'providers' in loginInfo %}
+      {% for provider in loginInfo['providers'] %}
+      <p> <a href="{{ provider['url'] }}">{{ provider['name'] }} </a> </p>
+      {% endfor %}
+  {% endif %}
+
 {% endblock %}

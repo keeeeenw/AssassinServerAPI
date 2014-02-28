@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if session.logged_in %}
+  <!--{% if session.logged_in %} -->
     <form action="{{ url_for('add_game') }}" method=post class=add-game>
       <dl>
         <dt>Title:
@@ -10,7 +10,7 @@
         <dd><input type=submit value=add>
       </dl>
     </form>
-  {% endif %}
+  <!--{% endif %} -->
   <h1> Avaliable Games </h1>
   <ul class=games>
   {% for game in games %}
