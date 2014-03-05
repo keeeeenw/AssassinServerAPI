@@ -5,21 +5,57 @@ App Engine datastore models
 
 """
 from google.appengine.ext import db
+import hashlib
+import uuid
+
 
 class Game(db.Model):
     title = db.StringProperty(required=True)
     num_player = db.IntegerProperty(required=True)
 
+
+def hash_password(password):
+    # salt = uuid.uuid4().hex
+    # return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ":" + salt
+    return password
+
+
+def verify_password(password, hashed_password):
+    # password, salt = hashed_password.split(':')
+    # return password == hashlib.sha256(salt.encode() + password.encode()).hexdigest()
+    return password == hashed_password
+
+
+class User(db.Model):
+    __table_name__ = 'user'
+    username = db.StringProperty(required=True)
+    password_hash = db.StringProperty(required=True)
+
+
 def bootstrap():
     """
         Adding bootstrap model objects to the database
     """
-    game1 = Game(title="MacAssassin", num_player=5)
+    game1 = Game(title="BattleRoyal", num_player=5)
     game1.put()
     game2 = Game(title="SQLAssassin", num_player=20)
     game2.put()
 
-if Game.all().count()==0: #run bootstrap if there is no data
+    user1 = User(username="admin", password_hash=hash_password("default"))
+    user1.put()
+
+
+def cleanup():
+    for user in User.all():
+        if isinstance(user, User):
+            user.delete()
+    for game in Game.all():
+        if isinstance(game, Game):
+            game.delete()
+
+
+cleanup()
+if Game.all().count() == 0 or User.all().count() == 0: #run bootstrap if there is no data
     bootstrap()
 
 
