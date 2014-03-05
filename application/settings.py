@@ -18,7 +18,7 @@ class Config(object):
     CSRF_SESSION_KEY = SESSION_KEY
     # Flask-Cache settings
     CACHE_TYPE = 'gaememcached'
-    USERNAME='admin' #fake admin username/password
+    USERNAME='ken' #fake admin username/password
     PASSWORD='default'
 
 class Development(Config):

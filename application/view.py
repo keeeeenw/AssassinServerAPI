@@ -1,16 +1,17 @@
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-     render_template, flash, jsonify
+    render_template, flash, jsonify
 from application import app
-from models import Game
+from models import Game, User, verify_password, hash_password
+
 
 def api_verif(dev_key):
     if dev_key == 't6ra1M77Ei80b35LeV5I55EN7c':
         return True
     return False
 
+
 @app.route('/')
 def show_games():
-
     #db = get_db()
     #cur = db.execute('select title, num_player from game order by id desc')
     #games = cur.fetchall()
@@ -21,11 +22,12 @@ def show_games():
     # Build dictionary 
     games = []
     for g in gs:
-        games.append({'title':str(g.title), 'num_player': int(g.num_player)})
+        games.append({'title': str(g.title), 'num_player': int(g.num_player)})
 
     print(games)
 
-    return render_template('show_games.html', games = games)
+    return render_template('show_games.html', games=games)
+
 
 @app.route('/api/list_games', methods=['GET'])
 def list_games():
@@ -45,6 +47,7 @@ def list_games():
         games[g.title] = g.num_player
 
     return jsonify(**games)
+
 
 @app.route('/add', methods=['POST'])
 def add_game():
@@ -70,15 +73,54 @@ def add_game():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
+        check_user = User.gql("WHERE username = :username", username=request.form['username'])
+        if check_user.count() == 0:
+            error = 'Username does not exist'
+        elif not verify_password(request.form['password'], check_user.get().password_hash):
+            error = "Invalid password"
+        # elif not verify_password(request.form['password'], check_user.get().password_hash):
+        #     error = "Invalid password"
+
+        # if request.form['username'] != app.config['USERNAME']:
+        #     error = 'Invalid username'
+        # elif request.form['password'] != app.config['PASSWORD']:
+        #     error = 'Invalid password'
         else:
             session['logged_in'] = True
             flash('You were logged in')
             return redirect(url_for('show_games'))
     return render_template('login.html', error=error)
+
+
+# @app.route('/rest_login', methods=['GET', 'POST'])
+# def rest_login():
+#     error = None
+#     if request.method == 'POST':
+#         if request.form['username'] != app.config['USERNAME']:
+#             error = 'Invalid username'
+#         elif request.form['password'] != app.config['PASSWORD']:
+#             error = 'Invalid password'
+#         else:
+#             session['logged_in'] = True
+#             flash('You were logged in')
+#             return redirect(url_for('show_games'))
+#     return render_template('login.html', error=error)
+
+
+@app.route('/api/users', methods=['POST'])
+def new_user():
+    username = request.json.get['username']
+    password = request.json.get['password']
+    if username is None or password is None:
+        abort(400)  # missing arguments
+    # if User.query.filter_by(username = username).first is not None:
+    #     abort(400)  # username already exists
+    user = User(username=username)
+    hash_password(password)
+    user.put()
+    return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.username, _external=True)}
+    # return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
+
 
 @app.route('/logout')
 def logout():
