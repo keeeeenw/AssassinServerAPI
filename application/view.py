@@ -78,13 +78,6 @@ def login():
             error = 'Username does not exist'
         elif not verify_password(request.form['password'], check_user.get().password_hash):
             error = "Invalid password"
-        # elif not verify_password(request.form['password'], check_user.get().password_hash):
-        #     error = "Invalid password"
-
-        # if request.form['username'] != app.config['USERNAME']:
-        #     error = 'Invalid username'
-        # elif request.form['password'] != app.config['PASSWORD']:
-        #     error = 'Invalid password'
         else:
             session['logged_in'] = True
             flash('You were logged in')
