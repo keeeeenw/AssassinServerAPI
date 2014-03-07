@@ -18,13 +18,12 @@ class Game(db.Model):
     start_time = db.DateTimeProperty()
     end_time = db.DateTimeProperty()
 
-
 class User(db.Model):
     __table_name__ = 'user'
     username = db.StringProperty(required=True)
     password_hash = db.StringProperty(required=True)
     creation_date = db.DateTimeProperty(auto_now_add=True)
-    email = db.StringProperty(required=True)
+    email = db.StringProperty()
 
 class GamePlayers(db.Model):
     join_date = db.DateTimeProperty(required=True)
@@ -33,6 +32,13 @@ class GamePlayers(db.Model):
     player = db.ReferenceProperty(User, collection_name="players")
     game = db.ReferenceProperty(Game, collection_name="games")
     isFinished = db.BooleanProperty()
+
+class TargetHistory(db.Model):
+    killer = db.ReferenceProperty(GamePlayers, collection_name="killerplayers")
+    target = db.ReferenceProperty(GamePlayers, collection_name="targetedplayers")
+    assign_date = db.DateTimeProperty()
+    isComplete = db.BooleanProperty()
+
 
 """
 Helper functions
@@ -73,8 +79,8 @@ def cleanup():
         if isinstance(game, Game):
             game.delete()
 
-cleanup()
 if Game.all().count() == 0 or User.all().count() == 0: #run bootstrap if there is no data
+    cleanup()
     bootstrap()
 
 
