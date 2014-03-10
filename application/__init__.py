@@ -5,8 +5,10 @@ from models import Game
 from flask import Flask 
 from flask_debugtoolbar import DebugToolbarExtension
 from werkzeug.debug import DebuggedApplication
+from flask_restful import Api, Resource
 
 app = Flask('application')
+api = Api(app)
 
 if os.getenv('FLASK_CONF') == 'DEV':
 	#development settings n

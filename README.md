@@ -27,5 +27,5 @@ if you do not want to log into the application
 3. The app is working on Google App Engine
 
 http://macassassingame.appspot.com
-
+http://www.raymondcamden.com/index.cfm/2012/6/21/Update-to-my-ServerBased-Login-PhoneGap-Demo
 

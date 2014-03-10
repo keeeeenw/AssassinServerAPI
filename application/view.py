@@ -85,19 +85,24 @@ def login():
     return render_template('login.html', error=error)
 
 
-# @app.route('/rest_login', methods=['GET', 'POST'])
-# def rest_login():
-#     error = None
-#     if request.method == 'POST':
-#         if request.form['username'] != app.config['USERNAME']:
-#             error = 'Invalid username'
-#         elif request.form['password'] != app.config['PASSWORD']:
-#             error = 'Invalid password'
-#         else:
-#             session['logged_in'] = True
-#             flash('You were logged in')
-#             return redirect(url_for('show_games'))
-#     return render_template('login.html', error=error)
+@app.route('/rest_login', methods=['GET', 'POST'])
+def rest_login():
+    error = None
+    if not request.json or not 'username' in request.json or not 'password' in request.json:
+        abort(400)
+    if request.method == 'POST':
+        check_user = User.gql("WHERE username = :username", username=request.json['username'])
+        if check_user.count() == 0:
+            error = 'Username does not exist'
+            return jsonify({'status': error}), 201
+        elif not verify_password(request.json['password'], check_user.get().password_hash):
+            error = "Invalid password"
+            return jsonify({'status': error}), 201
+        else:
+            session['logged_in'] = True
+            flash('You were logged in')
+            return jsonify({'status': True}), 201
+    abort(400)
 
 
 @app.route('/api/users', methods=['POST'])
@@ -111,7 +116,8 @@ def new_user():
     user = User(username=username)
     hash_password(password)
     user.put()
-    return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.username, _external=True)}
+    return jsonify({'username': user.username}), 201, {
+        'Location': url_for('get_user', id=user.username, _external=True)}
     # return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
 
 
@@ -128,5 +134,3 @@ def logout():
 #    """
 #    if hasattr(g, 'sqlite_db'):
 #        g.sqlite_db.close();
-
-
