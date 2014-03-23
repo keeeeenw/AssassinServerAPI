@@ -2,6 +2,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, jsonify
 from application import app
 from models import Game, User, verify_password, hash_password
+from decorators import jsonp, support_jsonp, crossdomain
 
 
 def api_verif(dev_key):
@@ -85,24 +86,21 @@ def login():
     return render_template('login.html', error=error)
 
 
-@app.route('/rest_login', methods=['GET', 'POST'])
+@app.route('/rest_login', methods=['POST', 'GET'])
+@support_jsonp
 def rest_login():
     error = None
-    if not request.json or not 'username' in request.json or not 'password' in request.json:
-        abort(400)
-    if request.method == 'POST':
-        check_user = User.gql("WHERE username = :username", username=request.json['username'])
-        if check_user.count() == 0:
-            error = 'Username does not exist'
-            return jsonify({'status': error}), 201
-        elif not verify_password(request.json['password'], check_user.get().password_hash):
-            error = "Invalid password"
-            return jsonify({'status': error}), 201
-        else:
-            session['logged_in'] = True
-            flash('You were logged in')
-            return jsonify({'status': True}), 201
-    abort(400)
+    check_user = User.gql("WHERE username = :username", username=request.json['username'])
+    if check_user.count() == 0:
+        error = 'Username does not exist'
+        return jsonify({'status': error}), 201# , {'Access-Control-Allow-Origin': '*'}
+    elif not verify_password(request.json['password'], check_user.get().password_hash):
+        error = "Invalid password"
+        return jsonify({'status': error}), 201# , {'Access-Control-Allow-Origin': '*'}
+    else:
+        session['logged_in'] = True
+        flash('You were logged in')
+        return jsonify({'status': True}), 201# , {'Access-Control-Allow-Origin': '*'}
 
 
 @app.route('/api/users', methods=['POST'])
@@ -134,3 +132,8 @@ def logout():
 #    """
 #    if hasattr(g, 'sqlite_db'):
 #        g.sqlite_db.close();
+
+@app.route('/my_service')
+@crossdomain(origin='*')
+def my_service():
+    return jsonify(foo='cross domain ftw')
