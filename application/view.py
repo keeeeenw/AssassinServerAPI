@@ -4,6 +4,7 @@ from application import app
 from models import Game, User, verify_password, hash_password
 from decorators import jsonp, support_jsonp, crossdomain
 
+
 def api_verif(dev_key):
     if dev_key == 't6ra1M77Ei80b35LeV5I55EN7c':
         return True
@@ -12,7 +13,7 @@ def api_verif(dev_key):
 
 @app.route('/')
 def show_games():
-    #db = get_db()
+    # db = get_db()
     #cur = db.execute('select title, num_player from game order by id desc')
     #games = cur.fetchall()
 
@@ -54,7 +55,7 @@ def add_game():
     if not session.get('logged_in'):
         abort(401)
 
-    #db = get_db()
+    # db = get_db()
     ## use ? to specify query parameters
     #db.execute('insert into game (title, num_player) values (?, ?)',
     #            [request.form['title'], request.form['num_player']])
@@ -63,7 +64,7 @@ def add_game():
     title = request.form['title']
     num_player = request.form['num_player']
     g = Game(title=title, num_player=int(num_player))
-    g.put() # save in the database
+    g.put()  # save in the database
 
     flash('New game was successfully posted')
     return redirect(url_for('show_games'))
@@ -111,7 +112,7 @@ def new_user():
     if username is None or password is None:
         abort(400)  # missing arguments
     # if User.query.filter_by(username = username).first is not None:
-    #     abort(400)  # username already exists
+    # abort(400)  # username already exists
     user = User(username=username)
     hash_password(password)
     user.put()
@@ -122,19 +123,6 @@ def new_user():
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None) #don't need to check it the key exist
+    session.pop('logged_in', None)  # don't need to check it the key exist
     flash('You were logged out')
     return redirect(url_for('show_games'))
-
-#@app.teardown_appcontext
-#def close_db(error):
-#    """
-#    Closes the database again at the end of the request.
-#    """
-#    if hasattr(g, 'sqlite_db'):
-#        g.sqlite_db.close();
-
-@app.route('/my_service')
-@crossdomain(origin='*')
-def my_service():
-    return jsonify(foo='cross domain ftw')

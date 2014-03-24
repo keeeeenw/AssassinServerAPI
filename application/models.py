@@ -11,12 +11,15 @@ import uuid
 """
 Here are the models
 """
+
+
 class Game(db.Model):
     title = db.StringProperty(required=True)
-    num_player = db.IntegerProperty(required=True) #maximum number of player
+    num_player = db.IntegerProperty(required=True)  # maximum number of player
     creation_date = db.DateTimeProperty(auto_now_add=True)
     start_time = db.DateTimeProperty()
     end_time = db.DateTimeProperty()
+
 
 class User(db.Model):
     __table_name__ = 'user'
@@ -25,6 +28,7 @@ class User(db.Model):
     creation_date = db.DateTimeProperty(auto_now_add=True)
     email = db.StringProperty()
 
+
 class GamePlayer(db.Model):
     join_date = db.DateTimeProperty(required=True)
     start_time = db.DateTimeProperty()
@@ -32,6 +36,7 @@ class GamePlayer(db.Model):
     player = db.ReferenceProperty(User, collection_name="players")
     game = db.ReferenceProperty(Game, collection_name="games")
     isFinished = db.BooleanProperty()
+
 
 class TargetHistory(db.Model):
     killer = db.ReferenceProperty(GamePlayer, collection_name="killerplayers")
@@ -44,6 +49,7 @@ class TargetHistory(db.Model):
 Helper functions
 """
 
+
 def hash_password(password):
     # salt = uuid.uuid4().hex
     # return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ":" + salt
@@ -55,9 +61,12 @@ def verify_password(password, hashed_password):
     # return password == hashlib.sha256(salt.encode() + password.encode()).hexdigest()
     return password == hashed_password
 
+
 """
 Let's create some fake data
 """
+
+
 def bootstrap():
     """
         Adding bootstrap model objects to the database
@@ -79,7 +88,8 @@ def cleanup():
         if isinstance(game, Game):
             game.delete()
 
-if Game.all().count() == 0 or User.all().count() == 0: #run bootstrap if there is no data
+
+if Game.all().count() == 0 or User.all().count() == 0:  # run bootstrap if there is no data
     cleanup()
     bootstrap()
 
