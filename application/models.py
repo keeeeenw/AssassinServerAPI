@@ -25,7 +25,7 @@ class User(db.Model):
     creation_date = db.DateTimeProperty(auto_now_add=True)
     email = db.StringProperty()
 
-class GamePlayers(db.Model):
+class GamePlayer(db.Model):
     join_date = db.DateTimeProperty(required=True)
     start_time = db.DateTimeProperty()
     end_time = db.DateTimeProperty()
@@ -34,8 +34,8 @@ class GamePlayers(db.Model):
     isFinished = db.BooleanProperty()
 
 class TargetHistory(db.Model):
-    killer = db.ReferenceProperty(GamePlayers, collection_name="killerplayers")
-    target = db.ReferenceProperty(GamePlayers, collection_name="targetedplayers")
+    killer = db.ReferenceProperty(GamePlayer, collection_name="killerplayers")
+    target = db.ReferenceProperty(GamePlayer, collection_name="targetedplayers")
     assign_date = db.DateTimeProperty()
     isComplete = db.BooleanProperty()
 
