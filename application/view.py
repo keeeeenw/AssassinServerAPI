@@ -4,7 +4,6 @@ from application import app
 from models import Game, User, verify_password, hash_password
 from decorators import jsonp, support_jsonp, crossdomain
 
-
 def api_verif(dev_key):
     if dev_key == 't6ra1M77Ei80b35LeV5I55EN7c':
         return True
@@ -86,21 +85,23 @@ def login():
     return render_template('login.html', error=error)
 
 
-@app.route('/rest_login', methods=['POST', 'GET'])
-@support_jsonp
+@app.route('/rest_login', methods=['POST', 'OPTIONS'])
+@crossdomain(origin='*', headers=['content-type'])
 def rest_login():
     error = None
-    check_user = User.gql("WHERE username = :username", username=request.json['username'])
+    # The first item is username, and the second is password
+    user_data = [item.split("=")[1] for item in str(request.data).split("&")]
+    check_user = User.gql("WHERE username = :username", username=user_data[0])
     if check_user.count() == 0:
         error = 'Username does not exist'
-        return jsonify({'status': error}), 201# , {'Access-Control-Allow-Origin': '*'}
-    elif not verify_password(request.json['password'], check_user.get().password_hash):
+        return jsonify({'status': error})
+    elif not verify_password(user_data[1], check_user.get().password_hash):
         error = "Invalid password"
-        return jsonify({'status': error}), 201# , {'Access-Control-Allow-Origin': '*'}
+        return jsonify({'status': error})
     else:
         session['logged_in'] = True
         flash('You were logged in')
-        return jsonify({'status': True}), 201# , {'Access-Control-Allow-Origin': '*'}
+        return jsonify({'status': True})
 
 
 @app.route('/api/users', methods=['POST'])
