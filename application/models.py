@@ -13,8 +13,8 @@ Here are the models
 """
 
 
-class Game(db.Model):
-    title = db.StringProperty(required=True)
+class Game(db.Model): #each class is a table, each field is a column
+    title = db.StringProperty(required=True) #required=True means not nullable
     num_player = db.IntegerProperty(required=True)  # maximum number of player
     creation_date = db.DateTimeProperty(auto_now_add=True)
     start_time = db.DateTimeProperty()
@@ -34,13 +34,13 @@ class GamePlayer(db.Model):
     start_time = db.DateTimeProperty()
     end_time = db.DateTimeProperty()
     player = db.ReferenceProperty(User, collection_name="players")
-    game = db.ReferenceProperty(Game, collection_name="games")
+    game = db.ReferenceProperty(Game, collection_name="games") #a 1-many relationship
     isFinished = db.BooleanProperty()
 
 
 class TargetHistory(db.Model):
-    killer = db.ReferenceProperty(GamePlayer, collection_name="killerplayers")
-    target = db.ReferenceProperty(GamePlayer, collection_name="targetedplayers")
+    killer = db.ReferenceProperty(GamePlayer, collection_name="killerplayers") #killer can be many players
+    target = db.ReferenceProperty(GamePlayer, collection_name="targetedplayers")#target can be many players
     assign_date = db.DateTimeProperty()
     isComplete = db.BooleanProperty()
 
