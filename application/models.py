@@ -78,6 +78,10 @@ def bootstrap():
 
     user1 = User(username="admin", password_hash=hash_password("default"))
     user1.put()
+    user2 = User(username="u1", password_hash=hash_password("p1"))
+    user2.put()
+    user3 = User(username="u2", password_hash=hash_password("p2"))
+    user3.put()
 
 
 def cleanup():
@@ -89,8 +93,7 @@ def cleanup():
             game.delete()
 
 
-if Game.all().count() == 0 or User.all().count() == 0:  # run bootstrap if there is no data
-    cleanup()
-    bootstrap()
-
-
+# if Game.all().count() == 0 or User.all().count() == 0:  # run bootstrap if there is no data
+# As for now, always bootstrap for development purposes
+cleanup()
+bootstrap()
