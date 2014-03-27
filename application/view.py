@@ -105,7 +105,7 @@ def rest_login():
         return jsonify({'status': True})
 
 
-@app.route('/api/users', methods=['POST'])
+@app.route('/api/new_user', methods=['POST'])
 def new_user():
     username = request.json.get['username']
     password = request.json.get['password']
