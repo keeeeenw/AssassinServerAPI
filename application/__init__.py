@@ -38,36 +38,3 @@ app.jinja_env.add_extension('jinja2.ext.loopcontrols')
 
 # Pull in URL dispatch routes, urls module imports view
 import urls
-
-#app.config.from_object('config')
-
-# Load default config and override config from 
-# an environment variable
-# app.config.update(dict(
-# ))
-
-#app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
-#def connect_db():
-#    """Connects to the specific database."""
-#    url = app.config['DATABASE']
-#    rv = sqlite3.connect(url)
-#    rv.row_factory = sqlite3.Row
-#    return rv
-#
-#def get_db():
-#    """
-#    Opens a new database connection if there is none yet for the
-#    current application context.
-#    """
-#    if not hasattr(g, 'sqlite_db'):
-#        g.sqlite_db = connect_db()
-#    return g.sqlite_db
-#
-#def init_db(): 
-#    #app context is not created yet, so we create it by hand
-#    with app.app_context():
-#        db = get_db()
-#        with app.open_resource('schema.sql', mode='r') as f:
-#            db.cursor().executescript(f.read())
-#        db.commit()

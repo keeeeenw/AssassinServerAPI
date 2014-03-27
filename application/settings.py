@@ -27,10 +27,6 @@ class Development(Config):
     DEBUG_TB_PROFILER_ENABLED = True
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     CSRF_ENABLED = True
-    #_basedir = os.path.abspath(os.path.dirname(__file__))
-    #DATABASE= os.path.join(_basedir, 'flaskr.db') # app.root_path get app root
-    #USERNAME='admin' #fake admin username/password
-    #PASSWORD='default'
 
 class Testing(Config):
     TESTING = True
