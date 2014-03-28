@@ -36,7 +36,7 @@ def new_user():
         'Location': url_for('get_user', id=user.username, _external=True)}
     # return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
 
-@app.route('/rest_login', methods=['POST', 'OPTIONS']) #login for the app. most of time return json when working with app as opposed to rendering a page
+@app.route('/api/rest_login', methods=['POST', 'OPTIONS']) #login for the app. most of time return json when working with app as opposed to rendering a page
 @crossdomain(origin='*', headers=['content-type'])
 def rest_login():
     error = None
