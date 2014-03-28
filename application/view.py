@@ -6,7 +6,8 @@ from decorators import jsonp, support_jsonp, crossdomain
 
 
 def api_verif(dev_key):
-    if dev_key == 't6ra1M77Ei80b35LeV5I55EN7c':
+    #  for testing purposes, using a simpler key to speed up curl calls
+    if dev_key == '123': #'t6ra1M77Ei80b35LeV5I55EN7c':
         return True
     return False
 
