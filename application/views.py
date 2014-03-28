@@ -136,3 +136,10 @@ def logout():
     flash('You were logged out')
     return redirect(url_for('show_games'))
 
+def warmup():
+    """App Engine warmup handler
+    See http://code.google.com/appengine/docs/python/config/appconfig.html#Warming_Requests
+
+    """
+    return ''
+

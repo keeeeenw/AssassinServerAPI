@@ -5,7 +5,7 @@ Taken from:  https://gist.github.com/1094140
 import json
 from datetime import timedelta
 from functools import wraps, update_wrapper
-from flask import redirect, request, current_app, make_response
+from flask import redirect, request, current_app, make_response, session
 
 def login_required(func):
     """Requires standard login credentials"""
@@ -15,7 +15,7 @@ def login_required(func):
             abort(401)
         return func(*args, **kwargs)
     return decorated_view
-    
+
 def jsonp(func):
     """Wraps JSONified output for JSONP requests."""
     @wraps(func)
