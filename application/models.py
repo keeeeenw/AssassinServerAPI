@@ -30,11 +30,11 @@ class User(db.Model):
 
 
 class GamePlayer(db.Model):
-    join_date = db.DateTimeProperty(required=True)
+    join_date = db.DateTimeProperty(auto_now_add=True)
     start_time = db.DateTimeProperty()
     end_time = db.DateTimeProperty()
-    player = db.ReferenceProperty(User, collection_name="players")
-    game = db.ReferenceProperty(Game, collection_name="games") #a 1-many relationship
+    player = db.ReferenceProperty(User, collection_name="game_players")
+    game = db.ReferenceProperty(Game, collection_name="game_players") #a 1-many relationship
     isFinished = db.BooleanProperty()
 
 
@@ -83,6 +83,23 @@ def bootstrap():
     user3 = User(username="u2", password_hash=hash_password("p2"))
     user3.put()
 
+    gameplayer1 = GamePlayer()
+    gameplayer1.game = game1
+    gameplayer1.player = user2
+    gameplayer1.isFinished = False
+    gameplayer1.put()
+
+    gameplayer2 = GamePlayer()
+    gameplayer2.game = game1
+    gameplayer2.player = user3
+    gameplayer2.isFinished = False
+    gameplayer2.put()
+
+    gameplayer3 = GamePlayer()
+    gameplayer3.game = game2
+    gameplayer3.player = user2
+    gameplayer3.isFinished = False
+    gameplayer3.put()
 
 def cleanup():
     for user in User.all():
@@ -91,7 +108,9 @@ def cleanup():
     for game in Game.all():
         if isinstance(game, Game):
             game.delete()
-
+    for gp in GamePlayer.all():
+        if isinstance(gp, GamePlayer):
+            gp.delete()
 
 # if Game.all().count() == 0 or User.all().count() == 0:  # run bootstrap if there is no data
 # As for now, always bootstrap for development purposes

@@ -71,7 +71,6 @@ def list_games():
 @login_required
 def games_for_player():
     username = request.args['username']
-    print(username) #print appears in command line
     #get all users, find where username matches game player
     users = User.all().filter('username =', username)
     
@@ -79,11 +78,29 @@ def games_for_player():
         return jsonify({'success':False})
     else:
         user = users.get()
-        return jsonify({'success':True})
-    
-    # return jsonify(**games) #does not render a page, just returns a Json
+        game_players = user.game_players
+        games = {}
+        for gp in game_players:
+            game = gp.game
+            game_id = game.key().id_or_name()
+            games[game_id] = parse_game(game)
+        info = {"success":True, "games":games, "username": username}
+        return jsonify(**info)
 
-
+"""
+Helper functions to parse object for JSON returns
+"""
+def parse_game(game):
+    game_id = game.key().id_or_name()
+    gameInfo = {
+        'game_id':game_id,
+        'title':game.title,
+        'num_player':game.num_player,
+        'creation_date':game.creation_date,
+        'start_time':game.start_time,
+        'end_time':game.end_time,
+    }
+    return gameInfo
 
 """
     Use the functions below for the web application
