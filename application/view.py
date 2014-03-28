@@ -88,7 +88,7 @@ def login():
 
 
 @app.route('/rest_login', methods=['POST', 'OPTIONS']) #login for the app. most of time return json when working with app as opposed to rendering a page
-@crossdomain(origin='*', headers=['content-type'])
+@crossdomain(origin='*', headers=['content-type']) 
 def rest_login():
     error = None
     # The first item is username, and the second is password
