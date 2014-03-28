@@ -2,8 +2,70 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, jsonify
 from application import app
 from models import Game, User, verify_password, hash_password
-from decorators import jsonp, support_jsonp, crossdomain
+from decorators import jsonp, support_jsonp, crossdomain, login_required
 
+"""
+The functions below are the supported APIs
+"""
+
+@app.route('/api/list_users', methods=['GET']) #client makes request to that url
+@login_required
+def list_users():
+    # Getting all the users
+    us = User.all()
+
+    # Build dictionary 
+    users = {}
+    for u in us:
+        users[u.username] = {'username':u.username, 'email':u.email, 'creation_date':u.creation_date} 
+
+    return jsonify(**users) #does not render a page, just returns a Json
+
+@app.route('/api/new_user', methods=['POST'])
+def new_user():
+    username = request.json.get['username']
+    password = request.json.get['password']
+    if username is None or password is None:
+        abort(400)  # missing arguments
+    # if User.query.filter_by(username = username).first is not None:
+    # abort(400)  # username already exists
+    user = User(username=username) #constructing new user
+    hash_password(password)
+    user.put() #put user in db
+    return jsonify({'username': user.username}), 201, {
+        'Location': url_for('get_user', id=user.username, _external=True)}
+    # return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
+
+@app.route('/rest_login', methods=['POST', 'OPTIONS']) #login for the app. most of time return json when working with app as opposed to rendering a page
+@crossdomain(origin='*', headers=['content-type'])
+def rest_login():
+    error = None
+    # The first item is username, and the second is password
+    user_data = [item.split("=")[1] for item in str(request.data).split("&")] #get this from the url
+    check_user = User.gql("WHERE username = :username", username=user_data[0]) #making sure they entered in their username correctly, checking against db
+    if check_user.count() == 0:
+        error = 'Username does not exist'
+        return jsonify({'status': error})
+    elif not verify_password(user_data[1], check_user.get().password_hash):
+        error = "Invalid password"
+        return jsonify({'status': error})
+    else:
+        session['logged_in'] = True
+        flash('You were logged in')
+        return jsonify({'status': True}) #this tells the client side that the user is successfully logged in
+
+@app.route('/api/list_games', methods=['GET']) #client makes request to that url
+@login_required
+def list_games():
+    # Getting all the games
+    gs = Game.all()
+
+    # Build dictionary 
+    games = {}
+    for g in gs:
+        games[g.title] = g.num_player
+
+    return jsonify(**games) #does not render a page, just returns a Json
 
 def api_verif(dev_key):
     #  for testing purposes, using a simpler key to speed up curl calls
@@ -11,7 +73,9 @@ def api_verif(dev_key):
         return True
     return False
 
-
+"""
+    Use the functions below for the web application
+"""
 @app.route('/') #calls root of the server, does the function below.  Take something and render something
 def show_games():
     # db = get_db()
@@ -29,27 +93,6 @@ def show_games():
     print(games)
 
     return render_template('show_games.html', games=games) #first games is key, games is value
-
-
-@app.route('/api/list_games', methods=['GET']) #client makes request to that url
-def list_games():
-    if 'dev_key' in request.args:
-        key = request.args['dev_key']
-        if not api_verif(key):
-            abort(401)
-    else:
-        if not session.get('logged_in'):
-            abort(401)
-    # Getting all the games
-    gs = Game.all()
-
-    # Build dictionary 
-    games = {}
-    for g in gs:
-        games[g.title] = g.num_player
-
-    return jsonify(**games) #does not render a page, just returns a Json
-
 
 @app.route('/add', methods=['POST'])
 def add_game():
@@ -87,62 +130,9 @@ def login():
     return render_template('login.html', error=error)
 
 
-@app.route('/rest_login', methods=['POST', 'OPTIONS']) #login for the app. most of time return json when working with app as opposed to rendering a page
-@crossdomain(origin='*', headers=['content-type'])
-def rest_login():
-    error = None
-    # The first item is username, and the second is password
-    user_data = [item.split("=")[1] for item in str(request.data).split("&")] #get this from the url
-    check_user = User.gql("WHERE username = :username", username=user_data[0]) #making sure they entered in their username correctly, checking against db
-    if check_user.count() == 0:
-        error = 'Username does not exist'
-        return jsonify({'status': error})
-    elif not verify_password(user_data[1], check_user.get().password_hash):
-        error = "Invalid password"
-        return jsonify({'status': error})
-    else:
-        session['logged_in'] = True
-        flash('You were logged in')
-        return jsonify({'status': True}) #this tells the client side that the user is successfully logged in
-
-
-@app.route('/api/new_user', methods=['POST'])
-def new_user():
-    username = request.json.get['username']
-    password = request.json.get['password']
-    if username is None or password is None:
-        abort(400)  # missing arguments
-    # if User.query.filter_by(username = username).first is not None:
-    # abort(400)  # username already exists
-    user = User(username=username) #constructing new user
-    hash_password(password)
-    user.put() #put user in db
-    return jsonify({'username': user.username}), 201, {
-        'Location': url_for('get_user', id=user.username, _external=True)}
-    # return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
-
-
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)  # don't need to check it the key exist
     flash('You were logged out')
     return redirect(url_for('show_games'))
 
-@app.route('/api/list_users', methods=['GET']) #client makes request to that url
-def list_users():
-    if 'dev_key' in request.args: #checking to make sure dev_key is a param
-        key = request.args['dev_key']
-        if not api_verif(key):
-            abort(401)
-    else:
-        if not session.get('logged_in'):
-            abort(401)
-    # Getting all the users
-    us = User.all()
-
-    # Build dictionary 
-    users = {}
-    for u in us:
-        users[u.username] = {'username':u.username, 'email':u.email, 'creation_date':u.creation_date} 
-
-    return jsonify(**users) #does not render a page, just returns a Json
