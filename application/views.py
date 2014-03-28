@@ -67,11 +67,23 @@ def list_games():
 
     return jsonify(**games) #does not render a page, just returns a Json
 
-def api_verif(dev_key):
-    #  for testing purposes, using a simpler key to speed up curl calls
-    if dev_key == '123': #'t6ra1M77Ei80b35LeV5I55EN7c':
-        return True
-    return False
+@app.route('/api/games_for_player', methods=['GET']) #client makes request to that url
+@login_required
+def games_for_player():
+    username = request.args['username']
+    print(username) #print appears in command line
+    #get all users, find where username matches game player
+    users = User.all().filter('username =', username)
+    
+    if users.count()==0:
+        return jsonify({'success':False})
+    else:
+        user = users.get()
+        return jsonify({'success':True})
+    
+    # return jsonify(**games) #does not render a page, just returns a Json
+
+
 
 """
     Use the functions below for the web application
@@ -129,45 +141,6 @@ def login():
             return redirect(url_for('show_games'))
     return render_template('login.html', error=error)
 
-
-<<<<<<< HEAD:application/view.py
-@app.route('/rest_login', methods=['POST', 'OPTIONS']) #login for the app. most of time return json when working with app as opposed to rendering a page
-@crossdomain(origin='*', headers=['content-type']) 
-def rest_login():
-    error = None
-    # The first item is username, and the second is password
-    user_data = [item.split("=")[1] for item in str(request.data).split("&")] #get this from the url
-    check_user = User.gql("WHERE username = :username", username=user_data[0]) #making sure they entered in their username correctly, checking against db
-    if check_user.count() == 0:
-        error = 'Username does not exist'
-        return jsonify({'status': error})
-    elif not verify_password(user_data[1], check_user.get().password_hash):
-        error = "Invalid password"
-        return jsonify({'status': error})
-    else:
-        session['logged_in'] = True
-        flash('You were logged in')
-        return jsonify({'status': True}) #this tells the client side that the user is successfully logged in
-
-
-@app.route('/api/users', methods=['POST'])
-def new_user():
-    username = request.json.get['username']
-    password = request.json.get['password']
-    if username is None or password is None:
-        abort(400)  # missing arguments
-    # if User.query.filter_by(username = username).first is not None:
-    # abort(400)  # username already exists
-    user = User(username=username) #constructing new user
-    hash_password(password)
-    user.put() #put user in db
-    return jsonify({'username': user.username}), 201, {
-        'Location': url_for('get_user', id=user.username, _external=True)}
-    # return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
-
-
-=======
->>>>>>> FETCH_HEAD:application/views.py
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)  # don't need to check it the key exist
