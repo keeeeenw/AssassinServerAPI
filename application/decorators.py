@@ -6,18 +6,24 @@ import json
 from datetime import timedelta
 from functools import wraps, update_wrapper
 from flask import redirect, request, current_app, make_response, session
+from lib.werkzeug.exceptions import abort
+
 
 def login_required(func):
     """Requires standard login credentials"""
+
     @wraps(func)
     def decorated_view(*args, **kwargs):
         if not session.get('logged_in'):
             abort(401)
         return func(*args, **kwargs)
+
     return decorated_view
+
 
 def jsonp(func):
     """Wraps JSONified output for JSONP requests."""
+
     @wraps(func)
     def decorated_function(*args, **kwargs):
         callback = request.args.get('callback', False)
@@ -28,10 +34,13 @@ def jsonp(func):
             return current_app.response_class(content, mimetype=mimetype)
         else:
             return func(*args, **kwargs)
+
     return decorated_function
+
 
 def support_jsonp(f):
     """Wraps JSONified output for JSONP"""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         callback = request.args.get('callback', False)
@@ -40,7 +49,9 @@ def support_jsonp(f):
             return current_app.response_class(content, mimetype='application/json')
         else:
             return f(*args, **kwargs)
+
     return decorated_function
+
 
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
@@ -81,4 +92,5 @@ def crossdomain(origin=None, methods=None, headers=None,
 
         f.provide_automatic_options = False
         return update_wrapper(wrapped_function, f)
+
     return decorator
