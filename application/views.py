@@ -61,7 +61,8 @@ def rest_login():
 
 
 @app.route('/api/list_games', methods=['GET'])  # client makes request to that url
-@login_required
+@crossdomain(origin='*')
+# @login_required
 def list_games():
     # Getting all the games
     gs = Game.all()
@@ -69,7 +70,7 @@ def list_games():
     # Build dictionary 
     games = {}
     for g in gs:
-        games[g.title] = g.num_player
+        games[str(g.key().id())] = {"title": g.title, "num_players": g.num_player}
 
     return jsonify(**games)  # does not render a page, just returns a Json
 
