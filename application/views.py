@@ -10,7 +10,8 @@ The functions below are the supported APIs
 
 
 @app.route('/api/list_users', methods=['GET'])  # client makes request to that url
-@login_required
+@crossdomain(origin='*')
+# @login_required
 def list_users():
     # Getting all the users
     us = User.all()
@@ -74,6 +75,11 @@ def list_games():
 
     return jsonify(**games)  # does not render a page, just returns a Json
 
+@app.route('/api/games', methods=['GET'])  # client makes request to that url
+@crossdomain(origin='*')
+# @login_required
+def get_game():
+    return jsonify()  # does not render a page, just returns a Json
 
 @app.route('/api/games_for_player', methods=['GET'])  # client makes request to that url
 @login_required

@@ -16,6 +16,7 @@ Here are the models
 class Game(db.Model): #each class is a table, each field is a column
     title = db.StringProperty(required=True) #required=True means not nullable
     num_player = db.IntegerProperty(required=True)  # maximum number of player
+    start_up = db.StringListProperty
     creation_date = db.DateTimeProperty(auto_now_add=True)
     start_time = db.DateTimeProperty()
     end_time = db.DateTimeProperty()
@@ -71,10 +72,12 @@ def bootstrap():
     """
         Adding bootstrap model objects to the database
     """
-    game1 = Game(title="BattleRoyal", num_player=5)
+    game1 = Game(title="BattleRoyale", num_player=5)
     game1.put()
     game2 = Game(title="SQLAssassin", num_player=20)
     game2.put()
+    game3 = Game(title="g_test", num_player=3, start_up=["admin", "u1", "u2"])
+    game3.put()
 
     user1 = User(username="admin", password_hash=hash_password("default"))
     user1.put()
