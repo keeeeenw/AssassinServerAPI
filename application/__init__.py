@@ -1,13 +1,14 @@
 # all the imports
 #import sqlite3
 import os
-from models import Game
+from models import Game, cleanup, bootstrap
 from flask import Flask 
 from flask_debugtoolbar import DebugToolbarExtension
 from werkzeug.debug import DebuggedApplication
 from flask_restful import Api, Resource
 
 app = Flask('application')
+app.before_first_request([cleanup, bootstrap])
 api = Api(app)
 
 if os.getenv('FLASK_CONF') == 'DEV':
