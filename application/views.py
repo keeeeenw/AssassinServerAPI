@@ -1,5 +1,6 @@
 from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, jsonify
+from google.appengine.ext.db import to_dict
 from application import app
 from models import Game, User, verify_password, hash_password
 from decorators import jsonp, support_jsonp, crossdomain, login_required
@@ -75,11 +76,14 @@ def list_games():
 
     return jsonify(**games)  # does not render a page, just returns a Json
 
-@app.route('/api/games', methods=['GET'])  # client makes request to that url
+@app.route('/api/games/<int:game_id>', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
-def get_game():
-    return jsonify()  # does not render a page, just returns a Json
+def get_game(game_id):
+    game = Game.get_by_id(game_id)
+    if game is None:
+        abort(400)
+    return jsonify({'games': str(to_dict(game))})  # does not render a page, just returns a Json
 
 @app.route('/api/games_for_player', methods=['GET'])  # client makes request to that url
 @login_required
