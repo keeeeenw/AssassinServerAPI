@@ -106,6 +106,34 @@ def games_for_player():
         return jsonify(**info)
 
 
+@app.route('/api/game_info', methods=['GET'])  # client makes request to that url
+@login_required
+def list_game():
+    title = request.args['title']
+    games = Game.all().filter('title =', title)
+
+    if games.count() == 0:
+        return jsonify({'success': False})
+    else:
+        game = games.get()
+        game_players = game.game_players
+        gps = {}
+        for gp in game_players:
+            user = gp.player
+            username = user.username
+            gps[username] = gp.isFinished #this line removes u2 from the output. why?
+        game_id = game.key().id_or_name()
+        num_player = game.num_player
+        creation_date = game.creation_date
+        start_time = game.start_time
+        end_time = game.end_time
+       
+        info = {"success": True, "game ID": game_id, "number of players": num_player,
+            "game name": game.title, "Creation Date":creation_date,
+            "start time": start_time, "end time": end_time, "players": gps} 
+        return jsonify(**info)
+
+
 """
 Helper functions to parse object for JSON returns
 """
