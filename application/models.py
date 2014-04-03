@@ -80,30 +80,31 @@ def bootstrap():
     game3 = Game(title="g_test", num_player=3, start_up=["admin", "u1", "u2"], current_state=["admin", "u1", "u2"])
     game3.put()
 
+
     user1 = User(username="admin", password_hash=hash_password("default"))
     user1.put()
-    user2 = User(username="u1", password_hash=hash_password("p1"))
-    user2.put()
-    user3 = User(username="u2", password_hash=hash_password("p2"))
-    user3.put()
 
-    gameplayer1 = GamePlayer()
-    gameplayer1.game = game1
-    gameplayer1.player = user2
-    gameplayer1.isFinished = False
-    gameplayer1.put()
+    for i in range(0, 10):
+        user = User(username="u" + str(i), password_hash=hash_password("p" + str(i)))
+        user.put()
 
-    gameplayer2 = GamePlayer()
-    gameplayer2.game = game1
-    gameplayer2.player = user3
-    gameplayer2.isFinished = False
-    gameplayer2.put()
-
-    gameplayer3 = GamePlayer()
-    gameplayer3.game = game2
-    gameplayer3.player = user2
-    gameplayer3.isFinished = False
-    gameplayer3.put()
+    # gameplayer1 = GamePlayer()
+    # gameplayer1.game = game1
+    # gameplayer1.player = user2
+    # gameplayer1.isFinished = False
+    # gameplayer1.put()
+    #
+    # gameplayer2 = GamePlayer()
+    # gameplayer2.game = game1
+    # gameplayer2.player = user3
+    # gameplayer2.isFinished = False
+    # gameplayer2.put()
+    #
+    # gameplayer3 = GamePlayer()
+    # gameplayer3.game = game2
+    # gameplayer3.player = user2
+    # gameplayer3.isFinished = False
+    # gameplayer3.put()
 
 def cleanup():
     for user in User.all():
@@ -115,3 +116,8 @@ def cleanup():
     for gp in GamePlayer.all():
         if isinstance(gp, GamePlayer):
             gp.delete()
+
+# Using this because before_fist_request only registers one function
+def set_up_wrapped():
+    cleanup()
+    bootstrap()
