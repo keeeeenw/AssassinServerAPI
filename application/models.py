@@ -16,7 +16,8 @@ Here are the models
 class Game(db.Model): #each class is a table, each field is a column
     title = db.StringProperty(required=True) #required=True means not nullable
     num_player = db.IntegerProperty(required=True)  # maximum number of player
-    start_up = db.StringListProperty
+    start_up = db.StringListProperty(required=True)
+    current_state = db.StringListProperty(required=True)
     creation_date = db.DateTimeProperty(auto_now_add=True)
     start_time = db.DateTimeProperty()
     end_time = db.DateTimeProperty()
@@ -72,11 +73,11 @@ def bootstrap():
     """
         Adding bootstrap model objects to the database
     """
-    game1 = Game(title="BattleRoyale", num_player=5)
+    game1 = Game(title="BattleRoyale", num_player=5, start_up=["admin", "u1", "u2"], current_state=["admin", "u1", "u2"])
     game1.put()
-    game2 = Game(title="SQLAssassin", num_player=20)
+    game2 = Game(title="SQLAssassin", num_player=20, start_up=["admin", "u1", "u2"], current_state=["admin", "u1", "u2"])
     game2.put()
-    game3 = Game(title="g_test", num_player=3, start_up=["admin", "u1", "u2"])
+    game3 = Game(title="g_test", num_player=3, start_up=["admin", "u1", "u2"], current_state=["admin", "u1", "u2"])
     game3.put()
 
     user1 = User(username="admin", password_hash=hash_password("default"))
@@ -114,8 +115,3 @@ def cleanup():
     for gp in GamePlayer.all():
         if isinstance(gp, GamePlayer):
             gp.delete()
-
-# if Game.all().count() == 0 or User.all().count() == 0:  # run bootstrap if there is no data
-# As for now, always bootstrap for development purposes
-cleanup()
-bootstrap()
