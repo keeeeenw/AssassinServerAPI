@@ -76,14 +76,18 @@ def list_games():
 
     return jsonify(**games)  # does not render a page, just returns a Json
 
-@app.route('/api/games/<int:game_id>', methods=['GET'])  # client makes request to that url
+
+@app.route('/api/game_info/<int:game_id>', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
 def get_game(game_id):
     game = Game.get_by_id(game_id)
     if game is None:
-        abort(400)
-    return jsonify({'games': str(to_dict(game))})  # does not render a page, just returns a Json
+        return jsonify({'success': False, 'info': None})
+    info = to_dict(game)
+    info['success'] = True
+    return jsonify({'success': True, 'info': info})  # does not render a page, just returns a Json
+
 
 @app.route('/api/games_for_player', methods=['GET'])  # client makes request to that url
 @login_required
@@ -103,34 +107,6 @@ def games_for_player():
             game_id = game.key().id_or_name()
             games[game_id] = parse_game(game)
         info = {"success": True, "games": games, "username": username}
-        return jsonify(**info)
-
-
-@app.route('/api/game_info', methods=['GET'])  # client makes request to that url
-@login_required
-def list_game():
-    title = request.args['title']
-    games = Game.all().filter('title =', title)
-
-    if games.count() == 0:
-        return jsonify({'success': False})
-    else:
-        game = games.get()
-        game_players = game.game_players
-        gps = {}
-        for gp in game_players:
-            user = gp.player
-            username = user.username
-            gps[username] = gp.isFinished #this line removes u2 from the output. why?
-        game_id = game.key().id_or_name()
-        num_player = game.num_player
-        creation_date = game.creation_date
-        start_time = game.start_time
-        end_time = game.end_time
-       
-        info = {"success": True, "game ID": game_id, "number of players": num_player,
-            "game name": game.title, "Creation Date":creation_date,
-            "start time": start_time, "end time": end_time, "players": gps} 
         return jsonify(**info)
 
 
@@ -173,7 +149,7 @@ def show_games():
 
     print(games)
 
-    return render_template('show_games.html', games=games)  #first games is key, games is value
+    return render_template('show_games.html', games=games)  # first games is key, games is value
 
 
 @app.route('/add', methods=['POST'])
@@ -184,7 +160,7 @@ def add_game():
     # db = get_db()
     # # use ? to specify query parameters
     # db.execute('insert into game (title, num_player) values (?, ?)',
-    #            [request.form['title'], request.form['num_player']])
+    # [request.form['title'], request.form['num_player']])
     #db.commit()
 
     title = request.form['title']  #takes what user put into show_games form
