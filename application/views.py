@@ -15,12 +15,12 @@ The functions below are the supported APIs
 # @login_required
 def list_users():
     # Getting all the users
-    us = User.all()
+    us = Player.all()
 
     # Build dictionary 
     users = {}
     for u in us:
-        users[u.username] = {'username': u.username, 'email': u.email, 'creation_date': u.creation_date}
+        users[u.username] = {'username': u.username, 'email': u.email, 'creation_date': u.creation_date, 'id': u.key().id()}
 
     return jsonify(**users)  # does not render a page, just returns a Json
 
@@ -33,7 +33,7 @@ def new_user():
         abort(400)  # missing arguments
     # if User.query.filter_by(username = username).first is not None:
     # abort(400)  # username already exists
-    user = User(username=username)  # constructing new user
+    user = Player(username=username)  # constructing new user
     hash_password(password)
     user.put()  # put user in db
     return jsonify({'username': user.username}), 201, {
@@ -48,7 +48,7 @@ def rest_login():
     error = None
     # The first item is username, and the second is password
     user_data = [str(request.json['username']), str(request.json['password'])]  # get this from the url
-    check_user = User.gql("WHERE username = :username", username=user_data[
+    check_user = Player.gql("WHERE username = :username", username=user_data[
         0])  # making sure they entered in their username correctly, checking against db
     if check_user.count() == 0:
         error = 'Username does not exist'
@@ -61,6 +61,19 @@ def rest_login():
         flash('You were logged in')
         return jsonify({'status': True})  # this tells the client side that the user is successfully logged in
 
+@app.route('/api/create_new_game', methods=['POST'])  # client makes request to that url
+@crossdomain(origin='*')
+# @login_required
+def create_new_game():
+    if Game.all().filter('title =', request.json['title']).count() == 0:
+        new_game = Game(title=request.json['title'], num_player=len(request.json['players']))
+        new_game.put()
+        for username in request.json['players']:
+            temp_player = Player.all().filter('username =', username).get()
+            GamePlayer(game=new_game, player=temp_player).put()
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False})
 
 @app.route('/api/list_games', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
@@ -77,30 +90,38 @@ def list_games():
     return jsonify(**games)  # does not render a page, just returns a Json
 
 
-@app.route('/api/game_info/<int:game_id>', methods=['GET'])  # client makes request to that url
+@app.route('/api/game_info', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
-def get_game(game_id):
-    game = Game.get_by_id(game_id)
+def get_game():
+    game = None
+    if len(request.args) == 1:
+        if 'game_id' in request.args:
+            game = Game.get_by_id(int(request.args['game_id']))
+            print(game.title)
+        if 'title' in request.args:
+            game = Game.all().filter('title =', request.args['title']).get()
     if game is None:
         return jsonify({'success': False, 'info': None})
     info = to_dict(game)
+    people = [game_player.player.username for game_player in game.players]
     info['success'] = True
+    info['participants'] = str(people)
     return jsonify({'success': True, 'info': info})  # does not render a page, just returns a Json
 
 
 @app.route('/api/games_for_player', methods=['GET'])  # client makes request to that url
-@login_required
+# @login_required
 def games_for_player():
     username = request.args['username']
     # get all users, find where username matches game player
-    users = User.all().filter('username =', username)
+    users = Player.all().filter('username =', username)
 
     if users.count() == 0:
         return jsonify({'success': False})
     else:
         user = users.get()
-        game_players = user.game_players
+        game_players = user.games
         games = {}
         for gp in game_players:
             game = gp.game
@@ -176,7 +197,7 @@ def add_game():
 def login():
     error = None
     if request.method == 'POST':
-        check_user = User.gql("WHERE username = :username", username=request.form['username'])
+        check_user = Player.gql("WHERE username = :username", username=request.form['username'])
         if check_user.count() == 0:
             error = 'Username does not exist'
         elif not verify_password(request.form['password'], check_user.get().password_hash):
