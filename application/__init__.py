@@ -1,15 +1,11 @@
 # all the imports
 #import sqlite3
 import os
-from models import Game, set_up_wrapped
-from flask import Flask 
+from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 from werkzeug.debug import DebuggedApplication
-from flask_restful import Api
 
 app = Flask('application')
-app.before_first_request(set_up_wrapped)
-api = Api(app)
 
 if os.getenv('FLASK_CONF') == 'DEV':
 	#development settings n
