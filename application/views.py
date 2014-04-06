@@ -66,9 +66,10 @@ def rest_login():
 # @login_required
 def create_new_game():
     if Game.all().filter('title =', request.json['title']).count() == 0:
-        new_game = Game(title=request.json['title'], num_player=len(request.json['players']))
+        players_to_join = set(request.json['players'])  # Makes sure each player is registered only once
+        new_game = Game(title=request.json['title'], num_player=len(players_to_join))
         new_game.put()
-        for username in request.json['players']:
+        for username in players_to_join:
             temp_player = Player.all().filter('username =', username).get()
             GamePlayer(game=new_game, player=temp_player).put()
         return jsonify({"success": True})
