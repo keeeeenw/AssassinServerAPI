@@ -2,8 +2,8 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, jsonify
 from google.appengine.ext.db import to_dict
 from application import app
-from models import Game, User, verify_password, hash_password
-from decorators import jsonp, support_jsonp, crossdomain, login_required
+from models import Game, Player, GamePlayer, verify_password, hash_password
+from decorators import crossdomain
 
 """
 The functions below are the supported APIs
