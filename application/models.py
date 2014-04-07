@@ -56,10 +56,7 @@ def hash_password(password):
 
 
 def verify_password(password, hashed_password):
-    if hashlib.md5(password) == hashed_password:
-        return password == hashed_password
-    else:
-        return False
+    return hashlib.md5(password).hexdigest() == hashed_password
 
 
 """
