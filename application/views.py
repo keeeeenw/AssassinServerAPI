@@ -2,8 +2,9 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, jsonify
 from google.appengine.ext.db import to_dict
 from application import app
-from models import Game, Player, GamePlayer, verify_password, hash_password
+from models import Game, Player, GamePlayer, GameHistory, verify_password, hash_password
 from decorators import crossdomain
+from random import shuffle
 
 """
 The functions below are the supported APIs
@@ -14,14 +15,11 @@ The functions below are the supported APIs
 @crossdomain(origin='*')
 # @login_required
 def list_users():
-    # Getting all the users
     us = Player.all()
-
-    # Build dictionary 
     users = {}
     for u in us:
-        users[u.username] = {'username': u.username, 'email': u.email, 'creation_date': u.creation_date, 'id': u.key().id()}
-
+        users[u.username] = {'username': u.username, 'email': u.email, 'creation_date': u.creation_date,
+                             'id': u.key().id()}
     return jsonify(**users)  # does not render a page, just returns a Json
 
 
@@ -41,8 +39,7 @@ def new_user():
     # return jsonify({'username': user.username}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
 
 
-@app.route('/api/rest_login', methods=['POST',
-                                       'OPTIONS'])  # login for the app. most of time return json when working with app as opposed to rendering a page
+@app.route('/api/rest_login', methods=['POST', 'OPTIONS'])  # login for the app
 @crossdomain(origin='*', headers=['content-type'])
 def rest_login():
     error = None
@@ -61,33 +58,35 @@ def rest_login():
         flash('You were logged in')
         return jsonify({'status': True})  # this tells the client side that the user is successfully logged in
 
+
 @app.route('/api/create_new_game', methods=['POST'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
 def create_new_game():
     if Game.all().filter('title =', request.json['title']).count() == 0:
-        players_to_join = set(request.json['players'])  # Makes sure each player is registered only once
+        name_of_player_to_join = list(set(request.json['players']))  # Makes sure each player is registered only once
+        shuffle(name_of_player_to_join)
+        players_to_join = [Player.all().filter('username =', name).get() for name in name_of_player_to_join]
         new_game = Game(title=request.json['title'], num_player=len(players_to_join))
         new_game.put()
-        for username in players_to_join:
-            temp_player = Player.all().filter('username =', username).get()
-            GamePlayer(game=new_game, player=temp_player).put()
+        for i in range(-1, len(players_to_join)-1):
+            killer = players_to_join[i]
+            GamePlayer(game=new_game, player=killer).put()
+            target = players_to_join[i+1]
+            GameHistory(killer=killer, target=target, game=new_game, is_complete=False).put()
         return jsonify({"success": True})
     else:
         return jsonify({"success": False})
+
 
 @app.route('/api/list_games', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
 def list_games():
-    # Getting all the games
     gs = Game.all()
-
-    # Build dictionary 
     games = {}
     for g in gs:
         games[str(g.key().id())] = {"title": g.title, "num_players": g.num_player}
-
     return jsonify(**games)  # does not render a page, just returns a Json
 
 
@@ -112,6 +111,7 @@ def get_game():
 
 
 @app.route('/api/games_for_player', methods=['GET'])  # client makes request to that url
+@crossdomain(origin='*')
 # @login_required
 def games_for_player():
     username = request.args['username']
@@ -130,6 +130,33 @@ def games_for_player():
             games[game_id] = parse_game(game)
         info = {"success": True, "games": games, "username": username}
         return jsonify(**info)
+
+
+@app.route('/api/kill', methods=['GET', 'POST'])
+@crossdomain(origin='*')
+# @login_required
+def kill():
+    try:
+        killer = Player.all().filter('username =', request.args["killer_name"]).get()
+        old_target = Player.all().filter('username =', request.args["target_name"]).get()
+        game = Game.all().filter('title =', request.args["game_title"]).get()
+        old_game_history_success = GameHistory.all()\
+            .filter('game =', game)\
+            .filter('killer =', killer)\
+            .filter('target =', old_target).get()
+        old_game_history_success.is_complete = True
+        old_game_history_success.put()
+        old_game_history_failure = GameHistory.all()\
+            .filter('game =', game)\
+            .filter('killer =', old_target)\
+            .filter('is_complete =', False).get()
+        old_game_history_failure.is_complete = True
+        old_game_history_failure.put()
+        new_target = old_game_history_failure.target
+        GameHistory(killer=killer, target=new_target, game=game, is_complete=False).put()
+        return jsonify({"success": True})
+    except:  # TODO: please handle exceptions in a more proper way
+        return jsonify({"success": False})
 
 
 """
@@ -183,7 +210,7 @@ def add_game():
     # # use ? to specify query parameters
     # db.execute('insert into game (title, num_player) values (?, ?)',
     # [request.form['title'], request.form['num_player']])
-    #db.commit()
+    # db.commit()
 
     title = request.form['title']  #takes what user put into show_games form
     num_player = request.form['num_player']
