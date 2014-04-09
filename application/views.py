@@ -166,7 +166,7 @@ def get_game_status():
     killer = Player.all().filter('username =', request.args["username"]).get()
     game = Game.all().filter('title =', request.args["title"]).get()
     game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
-    if game_history is None:
+    if game_history is not None:
         return jsonify({"target": game_history.target.username})
     else:
         return jsonify({"target": None})
