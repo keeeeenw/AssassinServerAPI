@@ -160,6 +160,23 @@ def kill():
         return jsonify({"success": False})
 
 
+@app.route('/api/game_player_status', methods=['GET'])
+@crossdomain(origin='*')
+# @login_required
+def get_game_status():
+    game = Game.all().filter('title =', request.args["title"]).get()
+    killer = Player.all().filter('username =', request.args["username"]).get()
+    player_in = GamePlayer.all().filter('game =', game).filter('player =', killer).get()
+    if player_in is None:
+        return jsonify({"target": None, "in_game": False})
+    else:
+        game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
+        if game_history is not None:
+            return jsonify({"target": game_history.target.username, "in_game": True})
+        else:
+            return jsonify({"target": None, "in_game": True})
+
+
 """
 Helper functions to parse object for JSON returns
 """
