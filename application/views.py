@@ -86,7 +86,8 @@ def list_games():
     gs = Game.all()
     games = {}
     for g in gs:
-        games[str(g.key().id())] = {"title": g.title, "num_players": g.num_player}
+        game_id = str(g.key().id_or_name())
+        games[game_id] = parse_game(g)
     return jsonify(**games)  # does not render a page, just returns a Json
 
 
