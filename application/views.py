@@ -142,27 +142,27 @@ def games_for_player():
 @crossdomain(origin='*')
 # @login_required
 def kill():
-    # try:
-    killer = Player.all().filter('username =', request.args["killer_name"]).get()
-    game = Game.all().filter('title =', request.args["game_title"]).get()
-    old_game_history_success = GameHistory.all()\
-        .filter('game =', game)\
-        .filter('killer =', killer)\
-        .filter('is_complete =', False).get()
-    old_target = old_game_history_success.target
-    old_game_history_success.is_complete = True
-    old_game_history_success.put()
-    old_game_history_failure = GameHistory.all()\
-        .filter('game =', game)\
-        .filter('killer =', old_target)\
-        .filter('is_complete =', False).get()
-    old_game_history_failure.is_complete = True
-    old_game_history_failure.put()
-    new_target = old_game_history_failure.target
-    GameHistory(killer=killer, target=new_target, game=game, is_complete=False).put()
-    return jsonify({"success": True})
-    # except:  # TODO: please handle exceptions in a more proper way
-    #     return jsonify({"success": False})
+    try:
+        killer = Player.all().filter('username =', request.args["killer_name"]).get()
+        game = Game.all().filter('title =', request.args["game_title"]).get()
+        old_game_history_success = GameHistory.all()\
+            .filter('game =', game)\
+            .filter('killer =', killer)\
+            .filter('is_complete =', False).get()
+        old_target = old_game_history_success.target
+        old_game_history_success.is_complete = True
+        old_game_history_success.put()
+        old_game_history_failure = GameHistory.all()\
+            .filter('game =', game)\
+            .filter('killer =', old_target)\
+            .filter('is_complete =', False).get()
+        old_game_history_failure.is_complete = True
+        old_game_history_failure.put()
+        new_target = old_game_history_failure.target
+        GameHistory(killer=killer, target=new_target, game=game, is_complete=False).put()
+        return jsonify({"success": True})
+    except:  # TODO: please handle exceptions in a more proper way
+        return jsonify({"success": False})
 
 
 @app.route('/api/game_player_status', methods=['GET'])
