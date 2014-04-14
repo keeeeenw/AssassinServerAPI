@@ -59,6 +59,9 @@ def rest_login():
         return jsonify({'status': True})  # this tells the client side that the user is successfully logged in
 
 
+# @app.route('/api/games', methods=['POST'])  # POST to add new game / GET to get game / PUT to update game - restful routing convention 
+# alternatively GET /games/17/players/3/, good for caching. However, anything that modifies the data should be POST/PUT/DELETE
+# add in a version number like /api/1.1/games
 @app.route('/api/create_new_game', methods=['POST'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
@@ -86,7 +89,8 @@ def list_games():
     gs = Game.all()
     games = {}
     for g in gs:
-        games[str(g.key().id())] = {"title": g.title, "num_players": g.num_player}
+        game_id = str(g.key().id_or_name())
+        games[game_id] = parse_game(g)
     return jsonify(**games)  # does not render a page, just returns a Json
 
 
