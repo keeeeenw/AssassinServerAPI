@@ -169,7 +169,7 @@ def kill():
 @crossdomain(origin='*')
 # @login_required
 def get_game_status():
-    game = Game.all().filter('title =', request.args["title"]).get()
+    game = Game.get_by_id(request.args["game_id"])
     killer = Player.all().filter('username =', request.args["username"]).get()
     player_in = GamePlayer.all().filter('game =', game).filter('player =', killer).get()
     if player_in is None:
