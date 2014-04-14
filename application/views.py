@@ -107,6 +107,8 @@ def get_game():
     people = [game_player.player.username for game_player in game.players]
     info['success'] = True
     info['participants'] = str(people)
+    # TODO: return the players that are alive
+    # TODO: return the killing relationships
     return jsonify({'success': True, 'info': info})  # does not render a page, just returns a Json
 
 
@@ -132,31 +134,31 @@ def games_for_player():
         return jsonify(**info)
 
 
-@app.route('/api/kill', methods=['GET', 'POST'])
+@app.route('/api/kill', methods=['POST'])
 @crossdomain(origin='*')
 # @login_required
 def kill():
-    try:
-        killer = Player.all().filter('username =', request.args["killer_name"]).get()
-        old_target = Player.all().filter('username =', request.args["target_name"]).get()
-        game = Game.all().filter('title =', request.args["game_title"]).get()
-        old_game_history_success = GameHistory.all()\
-            .filter('game =', game)\
-            .filter('killer =', killer)\
-            .filter('target =', old_target).get()
-        old_game_history_success.is_complete = True
-        old_game_history_success.put()
-        old_game_history_failure = GameHistory.all()\
-            .filter('game =', game)\
-            .filter('killer =', old_target)\
-            .filter('is_complete =', False).get()
-        old_game_history_failure.is_complete = True
-        old_game_history_failure.put()
-        new_target = old_game_history_failure.target
-        GameHistory(killer=killer, target=new_target, game=game, is_complete=False).put()
-        return jsonify({"success": True})
-    except:  # TODO: please handle exceptions in a more proper way
-        return jsonify({"success": False})
+    # try:
+    killer = Player.all().filter('username =', request.args["killer_name"]).get()
+    game = Game.all().filter('title =', request.args["game_title"]).get()
+    old_game_history_success = GameHistory.all()\
+        .filter('game =', game)\
+        .filter('killer =', killer)\
+        .filter('is_complete =', False).get()
+    old_target = old_game_history_success.target
+    old_game_history_success.is_complete = True
+    old_game_history_success.put()
+    old_game_history_failure = GameHistory.all()\
+        .filter('game =', game)\
+        .filter('killer =', old_target)\
+        .filter('is_complete =', False).get()
+    old_game_history_failure.is_complete = True
+    old_game_history_failure.put()
+    new_target = old_game_history_failure.target
+    GameHistory(killer=killer, target=new_target, game=game, is_complete=False).put()
+    return jsonify({"success": True})
+    # except:  # TODO: please handle exceptions in a more proper way
+    #     return jsonify({"success": False})
 
 
 @app.route('/api/game_player_status', methods=['GET'])
