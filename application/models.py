@@ -4,7 +4,8 @@ models.py
 App Engine datastore models
 
 """
-from random import shuffle
+from random import shuffle, random, choice
+import string
 from google.appengine.ext import db
 import hashlib
 
@@ -40,7 +41,8 @@ class GameHistory(db.Model):
     killer = db.ReferenceProperty(Player, required=True, collection_name="killer_history")  # killer can be many players
     target = db.ReferenceProperty(Player, required=True, collection_name="target_history")  # target can be many players
     game = db.ReferenceProperty(Game, required=True,
-                                collection_name="game_history")  # target can be many players    filter('killer =', killer).
+                                collection_name="game_history")  # target can be many players filter('killer =', killer).
+    confirm_msg = db.StringProperty(required=True)
     assign_date = db.DateTimeProperty()
     is_complete = db.BooleanProperty(required=True)
     complete_time = db.DateTimeProperty()
@@ -57,6 +59,10 @@ def hash_password(password):
 
 def verify_password(password, hashed_password):
     return hashlib.md5(password).hexdigest() == hashed_password
+
+
+def msg_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(choice(chars) for _ in range(size))
 
 
 """
@@ -91,7 +97,7 @@ def bootstrap():
         target = players_to_join[i + 1]
         if killer is not None and target is not None:
             GamePlayer(game=new_game, player=killer).put()
-            GameHistory(killer=killer, target=target, game=new_game, is_complete=False).put()
+            GameHistory(killer=killer, target=target, game=new_game, is_complete=False, confirm_msg=msg_generator()).put()
         else:
             cleanup()
             print("Error in seeding!")
