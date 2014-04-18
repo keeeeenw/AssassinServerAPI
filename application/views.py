@@ -8,6 +8,7 @@ from random import shuffle
 
 """
 The functions below are the supported APIs
+See documentation for details
 """
 
 
