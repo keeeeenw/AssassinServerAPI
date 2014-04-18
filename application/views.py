@@ -196,11 +196,12 @@ def get_game_status():
     if player_in is None:
         return jsonify({"target": None, "in_game": False})
     else:
-        game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
-        if game_history is not None:
-            return jsonify({"target": game_history.target.username, "in_game": True})
+        to_kill_game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
+        be_killed_game_history = GameHistory.all().filter('target =', killer).filter('game =', game).filter('is_complete', False).get()
+        if to_kill_game_history is not None:
+            return jsonify({"target": to_kill_game_history.target.username, "in_game": True, "msg": be_killed_game_history.confirm_msg})
         else:
-            return jsonify({"target": None, "in_game": True})
+            return jsonify({"target": None, "in_game": True, "msg": None})
 
 
 """
