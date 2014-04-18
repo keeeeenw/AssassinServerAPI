@@ -119,6 +119,6 @@ def cleanup():
 
 
 # Using this because before_fist_request only registers one function
-if Player.all().get() is None:
+if Game.all().get() is None:
     cleanup()
     bootstrap()

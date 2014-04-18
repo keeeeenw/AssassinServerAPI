@@ -2,7 +2,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, jsonify
 from google.appengine.ext.db import to_dict
 from application import app
-from models import Game, Player, GamePlayer, GameHistory, verify_password, hash_password
+from models import Game, Player, GamePlayer, GameHistory, verify_password, hash_password, msg_generator
 from decorators import crossdomain
 from random import shuffle
 
@@ -159,24 +159,28 @@ def games_for_player():
 # @login_required
 def kill():
     try:
+        msg = request.args['msg']
         killer = Player.all().filter('username =', request.args["killer_name"]).get()
         game = Game.all().filter('title =', request.args["game_title"]).get()
         old_game_history_success = GameHistory.all()\
             .filter('game =', game)\
             .filter('killer =', killer)\
             .filter('is_complete =', False).get()
-        old_target = old_game_history_success.target
-        old_game_history_success.is_complete = True
-        old_game_history_success.put()
-        old_game_history_failure = GameHistory.all()\
-            .filter('game =', game)\
-            .filter('killer =', old_target)\
-            .filter('is_complete =', False).get()
-        old_game_history_failure.is_complete = True
-        old_game_history_failure.put()
-        new_target = old_game_history_failure.target
-        GameHistory(killer=killer, target=new_target, game=game, is_complete=False).put()
-        return jsonify({"success": True})
+        if msg == old_game_history_success.confirm_msg:
+            old_target = old_game_history_success.target
+            old_game_history_success.is_complete = True
+            old_game_history_success.put()
+            old_game_history_failure = GameHistory.all()\
+                .filter('game =', game)\
+                .filter('killer =', old_target)\
+                .filter('is_complete =', False).get()
+            old_game_history_failure.is_complete = True
+            old_game_history_failure.put()
+            new_target = old_game_history_failure.target
+            GameHistory(killer=killer, target=new_target, game=game, is_complete=False, confirm_msg=msg_generator()).put()
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success: False"})
     except:  # TODO: please handle exceptions in a more proper way
         return jsonify({"success": False})
 
