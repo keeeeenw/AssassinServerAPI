@@ -116,6 +116,22 @@ def get_game():
     return jsonify({'success': True, 'info': info})  # does not render a page, just returns a Json
 
 
+@app.route('/api/user_info', methods=['GET'])  # client makes request to that url
+@crossdomain(origin='*')
+# @login_required
+def get_user():
+    user = None
+    if 'username' in request.args:
+        user = Player.all().filter('username =',request.args['username']).get()
+    if user is None:
+        return jsonify({'success': False, 'info': None})
+    info = to_dict(user)
+    info.pop("password_hash", None) #We don't want to show the hash
+    info['success'] = True
+    return jsonify({'success': True, 'info': info})  # does not render a page, just returns a Json
+
+
+
 @app.route('/api/games_for_player', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
@@ -169,7 +185,7 @@ def kill():
 @crossdomain(origin='*')
 # @login_required
 def get_game_status():
-    game = Game.get_by_id(request.args["game_id"])
+    game = Game.get_by_id(int(request.args["game_id"]))
     killer = Player.all().filter('username =', request.args["username"]).get()
     player_in = GamePlayer.all().filter('game =', game).filter('player =', killer).get()
     if player_in is None:
