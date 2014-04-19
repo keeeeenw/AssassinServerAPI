@@ -12,10 +12,10 @@ See documentation for details
 """
 
 
-@app.route('/api/list_users', methods=['GET'])  # client makes request to that url
+@app.route('/api/users', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
-def list_users():
+def users():
     us = Player.all()
     users = {}
     for u in us:
@@ -24,10 +24,12 @@ def list_users():
     return jsonify(**users)  # does not render a page, just returns a Json
 
 
-@app.route('/api/new_user', methods=['POST'])
+@app.route('/api/users/new', methods=['POST'])
+@crossdomain(origin='*')
 def new_user():
     username = request.json.get['username']
     password = request.json.get['password']
+    email = request.json.get['email']
     if username is None or password is None:
         abort(400)  # missing arguments
     # if User.query.filter_by(username = username).first is not None:
@@ -63,7 +65,7 @@ def rest_login():
 # @app.route('/api/games', methods=['POST'])  # POST to add new game / GET to get game / PUT to update game - restful routing convention 
 # alternatively GET /games/17/players/3/, good for caching. However, anything that modifies the data should be POST/PUT/DELETE
 # add in a version number like /api/1.1/games
-@app.route('/api/create_new_game', methods=['POST'])  # client makes request to that url
+@app.route('/api/games/new', methods=['POST'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
 def create_new_game():
@@ -83,10 +85,10 @@ def create_new_game():
         return jsonify({"success": False})
 
 
-@app.route('/api/list_games', methods=['GET'])  # client makes request to that url
+@app.route('/api/games', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
-def list_games():
+def games():
     gs = Game.all()
     games = {}
     for g in gs:
@@ -112,8 +114,8 @@ def get_game():
     people = [game_player.player.username for game_player in game.players]
     info['success'] = True
     info['participants'] = str(people)
-    # TODO: return the players that are alive
-    # TODO: return the killing relationships
+    game_history = GameHistory.all().filter('game =', game).filter('is_complete =', False)
+    info['survivors'] = [record.killer.username for record in game_history]
     return jsonify({'success': True, 'info': info})  # does not render a page, just returns a Json
 
 
@@ -162,7 +164,7 @@ def kill():
     try:
         msg = request.args['msg']
         killer = Player.all().filter('username =', request.args["killer_name"]).get()
-        game = Game.all().filter('title =', request.args["game_title"]).get()
+        game = Game.get_by_id(int(request.args["game_id"]))
         old_game_history_success = GameHistory.all()\
             .filter('game =', game)\
             .filter('killer =', killer)\
