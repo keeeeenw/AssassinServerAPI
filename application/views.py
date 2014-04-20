@@ -77,8 +77,8 @@ def games():
 # @app.route('/api/games', methods=['POST'])  # POST to add new game / GET to get game / PUT to update game - restful routing convention
 # alternatively GET /games/17/players/3/, good for caching. However, anything that modifies the data should be POST/PUT/DELETE
 # add in a version number like /api/1.1/games
-@app.route('/api/games', methods=['POST'])  # client makes request to that url
-@crossdomain(origin='*')
+@app.route('/api/games', methods=['POST', 'OPTIONS'])  # client makes request to that url
+@crossdomain(origin='*', headers=['content-type'])
 # @login_required
 def create_new_game():
     if Game.all().filter('title =', request.json['title']).count() == 0:
