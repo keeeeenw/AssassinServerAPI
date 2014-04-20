@@ -163,7 +163,7 @@ def games_for_player():
 def kill():
     try:
         msg = request.args['msg']
-        killer = Player.all().filter('username =', request.args["killer_name"]).get()
+        killer = Player.all().filter('username =', request.args["username"]).get()
         game = Game.get_by_id(int(request.args["game_id"]))
         old_game_history_success = GameHistory.all()\
             .filter('game =', game)\
@@ -181,11 +181,11 @@ def kill():
             old_game_history_failure.put()
             new_target = old_game_history_failure.target
             GameHistory(killer=killer, target=new_target, game=game, is_complete=False, confirm_msg=msg_generator()).put()
-            return jsonify({"success": True})
+            return jsonify({"success": True, "info": "Your enemy has been slain! "})
         else:
-            return jsonify({"success: False"})
+            return jsonify({"success": False, "info": "The message is incorrect. Are you trying to game the system?!"})
     except:  # TODO: please handle exceptions in a more proper way
-        return jsonify({"success": False})
+        return jsonify({"success": False, "info": "Something is fundamentally wrong. "})
 
 
 @app.route('/api/game_player_status', methods=['GET'])
