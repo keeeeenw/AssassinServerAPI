@@ -231,17 +231,13 @@ def parse_game(game):
 
 @app.route('/')  # calls root of the server, does the function below.  Take something and render something
 def show_games():
-    # db = get_db()
-    # cur = db.execute('select title, num_player from game order by id desc')
-    # games = cur.fetchall()
-
     # Getting all the games
     gs = Game.all()
 
     # Build dictionary 
     games = []
     for g in gs:
-        games.append({'title': str(g.title), 'num_player': int(g.num_player)})
+        games.append(to_dict(g))
 
     print(games)
 

@@ -11,6 +11,7 @@ h2              { font-size: 1.2em; }
 .games li h2  { margin-left: -1em; }
 .add-game      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
 .add-game dl   { font-weight: bold; }
+.game-item  	{ list-style: none; margin: 0; padding: 0; }
 .metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
                   margin-bottom: 1em; background: #fafafa; }
 .flash          { background: #cee5F5; padding: 0.5em;
