@@ -91,7 +91,7 @@ def create_new_game():
             killer = players_to_join[i]
             GamePlayer(game=new_game, player=killer).put()
             target = players_to_join[i+1]
-            GameHistory(killer=killer, target=target, game=new_game, is_complete=False).put()
+            GameHistory(killer=killer, target=target, game=new_game, is_complete=False, confirm_msg=msg_generator()).put()
         return jsonify({"success": True})
     else:
         return jsonify({"success": False})
@@ -126,7 +126,6 @@ def get_user():
     info.pop("password_hash", None) #We don't want to show the hash
     info['success'] = True
     return jsonify({'success': True, 'info': info})  # does not render a page, just returns a Json
-
 
 
 @app.route('/api/games_for_player', methods=['GET'])  # client makes request to that url
