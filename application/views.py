@@ -1,5 +1,5 @@
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-    render_template, flash, jsonify
+    render_template, flash, jsonify, make_response
 from google.appengine.ext.db import to_dict
 from application import app
 from models import Game, Player, GamePlayer, GameHistory, verify_password, hash_password, msg_generator
@@ -97,17 +97,11 @@ def games():
     return jsonify(**games)  # does not render a page, just returns a Json
 
 
-@app.route('/api/game_info', methods=['GET'])  # client makes request to that url
+@app.route('/api/games/<int:game_id>', methods=['GET'])  # client makes request to that url
 @crossdomain(origin='*')
 # @login_required
-def get_game():
-    game = None
-    if len(request.args) == 1:
-        if 'game_id' in request.args:
-            game = Game.get_by_id(int(request.args['game_id']))
-            print(game.title)
-        if 'title' in request.args:
-            game = Game.all().filter('title =', request.args['title']).get()
+def get_game(game_id):
+    game = Game.get_by_id(int(game_id))
     if game is None:
         return jsonify({'success': False, 'info': None})
     info = to_dict(game)
@@ -163,7 +157,7 @@ def games_for_player():
 def kill():
     try:
         msg = request.args['msg']
-        killer = Player.all().filter('username =', request.args["killer_name"]).get()
+        killer = Player.all().filter('username =', request.args["username"]).get()
         game = Game.get_by_id(int(request.args["game_id"]))
         old_game_history_success = GameHistory.all()\
             .filter('game =', game)\
@@ -181,11 +175,11 @@ def kill():
             old_game_history_failure.put()
             new_target = old_game_history_failure.target
             GameHistory(killer=killer, target=new_target, game=game, is_complete=False, confirm_msg=msg_generator()).put()
-            return jsonify({"success": True})
+            return jsonify({"success": True, "info": "Your enemy has been slain! "})
         else:
-            return jsonify({"success: False"})
+            return jsonify({"success": False, "info": "The message is incorrect. Are you trying to game the system?!"})
     except:  # TODO: please handle exceptions in a more proper way
-        return jsonify({"success": False})
+        return jsonify({"success": False, "info": "Something is fundamentally wrong. "})
 
 
 @app.route('/api/game_player_status', methods=['GET'])
@@ -204,6 +198,11 @@ def get_game_status():
             return jsonify({"target": to_kill_game_history.target.username, "in_game": True, "msg": be_killed_game_history.confirm_msg})
         else:
             return jsonify({"target": None, "in_game": True, "msg": None})
+
+
+# @app.errorhandler(404)
+# def not_found(error):
+#     return make_response(jsonify( { 'error': 'Not found' } ), 404)
 
 
 """
