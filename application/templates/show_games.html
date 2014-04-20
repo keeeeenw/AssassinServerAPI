@@ -11,11 +11,16 @@
       </dl>
     </form>
   {% endif %}
-  <h1> Avaliable Games </h1>
+  <h2> Avaliable Games </h2>
   <ul class=games>
   {% for game in games %}
-    <li><h2>{{ game.title }}</h2>
-    number of players: {{ game.num_player|safe }}
+    <ul class=game-item>
+    <li><h3>{{ game.title }}</h3></li>
+    <li>number of players: {{ game.num_player|safe }}</li>
+    <li>start time: {{ game.start_time|safe }}</li>
+    <li>end time: {{ game.end_time|safe }}</li>
+    <li>creation time: {{ game.creation_time|safe }}</li>
+    </ul>
   {% else %}
     <li><em>Unbelievable.  No entries here so far</em>
   {% endfor %}
