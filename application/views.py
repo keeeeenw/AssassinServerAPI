@@ -186,21 +186,29 @@ def kill():
 # @login_required
 def get_game_status():
     game = Game.get_by_id(int(request.args["game_id"]))
+    info = {"target": None, "in_game": False, "game_exists": False, "msg": None, "player_exists": False}
     if game is None:
-        return jsonify({"target": None, "in_game": False, "game_exists": False})
+        info["msg"] = "Game does not exists. "
+        return jsonify(info)
+    info["game_exists"] = True
     killer = Player.all().filter('username =', request.args["username"]).get()
-    if game is None:
-        return jsonify({"target": None, "in_game": False, "game_exists": True})
+    if killer is None:
+        info["msg"] = "Player trying to kill does not exist. "
+        return jsonify(info)
+    info["player_exists"] = True
     player_in = GamePlayer.all().filter('game =', game).filter('player =', killer).get()
     if player_in is None:
-        return jsonify({"target": None, "in_game": False, "game_exists": True})
+        info["msg"] = "Player trying to kill is not in this game. "
+        return jsonify(info)
+    info["in_game"] = True
+    to_kill_game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
+    be_killed_game_history = GameHistory.all().filter('target =', killer).filter('game =', game).filter('is_complete', False).get()
+    if to_kill_game_history is None:
+        return jsonify(info)
     else:
-        to_kill_game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
-        be_killed_game_history = GameHistory.all().filter('target =', killer).filter('game =', game).filter('is_complete', False).get()
-        if to_kill_game_history is not None:
-            return jsonify({"target": to_kill_game_history.target.username, "in_game": True, "msg": be_killed_game_history.confirm_msg})
-        else:
-            return jsonify({"target": None, "in_game": True, "msg": None})
+        info["target"] = to_kill_game_history.target.username
+        info["msg"] = be_killed_game_history.confirm_msg
+        return jsonify(info)
 
 
 # @app.errorhandler(404)
