@@ -1,5 +1,5 @@
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-    render_template, flash, jsonify, make_response
+    render_template, flash, jsonify
 from google.appengine.ext.db import to_dict
 from application import app
 from models import Game, Player, GamePlayer, GameHistory, verify_password, hash_password, msg_generator
@@ -21,10 +21,23 @@ def users():
     for u in us:
         users[u.username] = {'username': u.username, 'email': u.email, 'creation_date': u.creation_date,
                              'id': u.key().id()}
-    return jsonify(**users)  # does not render a page, just returns a Json
+    return jsonify(**users)
 
 
-@app.route('/api/users/new', methods=['POST'])
+@app.route('/api/games/players/<int:player_id>', methods=['GET'])  # client makes request to that url
+@crossdomain(origin='*')
+# @login_required
+def get_player(player_id):
+    player = Player.get_by_id(player_id)
+    game_players = GamePlayer.all().filter('player =', player)
+    games = [game_player.game for game_player in game_players]
+    info = {}
+    for game in games:
+        info[str(game.key().id())] = to_dict(game)
+    return jsonify(**info)
+
+
+@app.route('/api/players/new', methods=['POST'])
 @crossdomain(origin='*')
 def new_user():
     username = request.json.get['username']
@@ -48,18 +61,17 @@ def rest_login():
     error = None
     # The first item is username, and the second is password
     user_data = [str(request.json['username']), str(request.json['password'])]  # get this from the url
-    check_user = Player.gql("WHERE username = :username", username=user_data[
-        0])  # making sure they entered in their username correctly, checking against db
-    if check_user.count() == 0:
+    player = Player.all().filter('username =', user_data[0]).get()  # making sure they entered in their username correctly, checking against db
+    if player is None:
         error = 'Username does not exist'
-        return jsonify({'status': error})
-    elif not verify_password(user_data[1], check_user.get().password_hash):
+        return jsonify({'status': error, "user_id": None})
+    elif not verify_password(user_data[1], player.password_hash):
         error = "Invalid password"
-        return jsonify({'status': error})
+        return jsonify({'status': error, "user_id": None})
     else:
         session['logged_in'] = True
         flash('You were logged in')
-        return jsonify({'status': True})  # this tells the client side that the user is successfully logged in
+        return jsonify({'status': True, "user_id": player.key().id()})  # this tells the client side that the user is successfully logged in
 
 
 @app.route('/api/games', methods=['GET'])  # client makes request to that url
@@ -74,9 +86,6 @@ def games():
     return jsonify(**games)  # does not render a page, just returns a Json
 
 
-# @app.route('/api/games', methods=['POST'])  # POST to add new game / GET to get game / PUT to update game - restful routing convention
-# alternatively GET /games/17/players/3/, good for caching. However, anything that modifies the data should be POST/PUT/DELETE
-# add in a version number like /api/1.1/games
 @app.route('/api/games', methods=['POST', 'OPTIONS'])  # client makes request to that url
 @crossdomain(origin='*', headers=['content-type'])
 # @login_required
@@ -307,4 +316,3 @@ def warmup():
 
     """
     return ''
-
