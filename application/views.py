@@ -20,7 +20,7 @@ def users():
     users = {}
     for u in us:
         users[u.username] = {'username': u.username, 'email': u.email, 'creation_date': u.creation_date,
-                             'id': u.key().id()}
+                             'player_id': u.key().id()}
     return jsonify(**users)
 
 
