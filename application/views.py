@@ -186,10 +186,14 @@ def kill():
 # @login_required
 def get_game_status():
     game = Game.get_by_id(int(request.args["game_id"]))
+    if game is None:
+        return jsonify({"target": None, "in_game": False, "game_exists": False})
     killer = Player.all().filter('username =', request.args["username"]).get()
+    if game is None:
+        return jsonify({"target": None, "in_game": False, "game_exists": True})
     player_in = GamePlayer.all().filter('game =', game).filter('player =', killer).get()
     if player_in is None:
-        return jsonify({"target": None, "in_game": False})
+        return jsonify({"target": None, "in_game": False, "game_exists": True})
     else:
         to_kill_game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
         be_killed_game_history = GameHistory.all().filter('target =', killer).filter('game =', game).filter('is_complete', False).get()
