@@ -35,6 +35,7 @@ class GamePlayer(db.Model):
     end_time = db.DateTimeProperty()
     player = db.ReferenceProperty(Player, required=True, collection_name="games")  # collection_name='game_players111')
     game = db.ReferenceProperty(Game, required=True, collection_name="players")  # a 1-many relationship
+    is_winner = db.BooleanProperty(default=False)
 
 
 class GameHistory(db.Model):
