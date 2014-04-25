@@ -172,6 +172,9 @@ def kill():
             .filter('killer =', killer)\
             .filter('is_complete =', False).get()
         if msg == old_game_history_success.confirm_msg:
+            will_be_last_kill = None
+            if GameHistory.all().filter("game =", game).filter("is_complete =", False).count() == 2:
+                will_be_last_kill = True
             old_target = old_game_history_success.target
             old_game_history_success.is_complete = True
             old_game_history_success.put()
@@ -181,20 +184,25 @@ def kill():
                 .filter('is_complete =', False).get()
             old_game_history_failure.is_complete = True
             old_game_history_failure.put()
+            if will_be_last_kill:
+                game_player = GamePlayer.all().filter('game =', game).filter('player =', killer).get()
+                game_player.is_winner = True
+                game_player.put()
+                return {"success": True, "info": "Your enemy has been slain! "}
             new_target = old_game_history_failure.target
             GameHistory(killer=killer, target=new_target, game=game, is_complete=False, confirm_msg=msg_generator()).put()
             return jsonify({"success": True, "info": "Your enemy has been slain! "})
         else:
             return jsonify({"success": False, "info": "The message is incorrect. Are you trying to game the system?!"})
     except:  # TODO: please handle exceptions in a more proper way
-        return jsonify({"success": False, "info": "Something is fundamentally wrong. ", "he": str(request.data)})
+        return jsonify({"success": False, "info": "Something is fundamentally wrong. ", "Data received by server": str(request.data)})
 
 
 @app.route('/api/game_player_status', methods=['GET'])
 @crossdomain(origin='*')
 # @login_required
 def get_game_status():
-    info = {"target": None, "in_game": False, "game_exists": False, "msg": None, "player_exists": False}
+    info = {"target": None, "in_game": False, "game_exists": False, "msg": None, "player_exists": False, "game_completed": False, "winner_name": None}
     try:
         game = Game.get_by_id(int(request.args["game_id"]))
         if game is None:
@@ -211,6 +219,11 @@ def get_game_status():
             info["msg"] = "Player trying to kill is not in this game. "
             return jsonify(info)
         info["in_game"] = True
+        if GameHistory.all().filter("game =", game).filter("is_complete =", False).count() == 0:
+            info["game_completed"] = True
+            game_player = GamePlayer.all().filter('game =', game).filter('is_winner =', True).get()
+            info["winner_name"] = str(game_player.player.username)
+            return jsonify(info)
         to_kill_game_history = GameHistory.all().filter('killer =', killer).filter('game =', game).filter('is_complete', False).get()
         be_killed_game_history = GameHistory.all().filter('target =', killer).filter('game =', game).filter('is_complete', False).get()
         if to_kill_game_history is None:
