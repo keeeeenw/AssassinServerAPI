@@ -188,7 +188,7 @@ def kill():
                 game_player = GamePlayer.all().filter('game =', game).filter('player =', killer).get()
                 game_player.is_winner = True
                 game_player.put()
-                return {"success": True, "info": "Your enemy has been slain! "}
+                return jsonify({"success": True, "info": "Your enemy has been slain! "})
             new_target = old_game_history_failure.target
             GameHistory(killer=killer, target=new_target, game=game, is_complete=False, confirm_msg=msg_generator()).put()
             return jsonify({"success": True, "info": "Your enemy has been slain! "})
