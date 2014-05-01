@@ -1,3 +1,4 @@
+from datetime import time, datetime
 from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash, jsonify
 from google.appengine.ext.db import to_dict
@@ -202,8 +203,9 @@ def kill():
 @crossdomain(origin='*')
 # @login_required
 def get_game_status():
-    info = {"target": None, "in_game": False, "game_exists": False, "msg": None, "player_exists": False, "game_completed": False, "winner_name": None}
+    info = {"target": None, "in_game": False, "game_exists": False, "msg": None, "player_exists": False, "game_completed": False, "time_left": None}
     try:
+        info["time_left"] = "October 14, 1975 11:13:00"
         game = Game.get_by_id(int(request.args["game_id"]))
         if game is None:
             info["msg"] = "Game does not exists. "
@@ -229,10 +231,12 @@ def get_game_status():
         if to_kill_game_history is None:
             return jsonify(info)
         else:
+
             info["target"] = to_kill_game_history.target.username
             info["msg"] = be_killed_game_history.confirm_msg
             return jsonify(info)
     except:
+        # info["time_left"] = str(datetime.datetime.now())
         info["msg"] = "Something is fundamentally wrong. "
         return jsonify(info)
 
