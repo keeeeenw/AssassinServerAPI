@@ -205,7 +205,7 @@ def kill():
 def get_game_status():
     info = {"target": None, "in_game": False, "game_exists": False, "msg": None, "player_exists": False, "game_completed": False, "time_left": None}
     try:
-        info["time_left"] = "October 14, 1975 11:13:00"
+        info["time_left"] = "October 14, 2014 11:13:00"
         game = Game.get_by_id(int(request.args["game_id"]))
         if game is None:
             info["msg"] = "Game does not exists. "
