@@ -31,8 +31,6 @@ class Player(db.Model):
 
 class GamePlayer(db.Model):
     join_date = db.DateTimeProperty(auto_now_add=True)
-    start_time = db.DateTimeProperty()
-    end_time = db.DateTimeProperty()
     player = db.ReferenceProperty(Player, required=True, collection_name="games")  # collection_name='game_players111')
     game = db.ReferenceProperty(Game, required=True, collection_name="players")  # a 1-many relationship
     is_winner = db.BooleanProperty(default=False)
@@ -44,7 +42,7 @@ class GameHistory(db.Model):
     game = db.ReferenceProperty(Game, required=True,
                                 collection_name="game_history")  # target can be many players filter('killer =', killer).
     confirm_msg = db.StringProperty(required=True)
-    assign_date = db.DateTimeProperty()
+    assign_date = db.DateTimeProperty(auto_now_add=True)
     is_complete = db.BooleanProperty(required=True)
     complete_time = db.DateTimeProperty()
 
