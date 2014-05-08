@@ -1,11 +1,14 @@
-from datetime import time, datetime
-from flask import Flask, request, session, g, redirect, url_for, abort, \
+from datetime import datetime, timedelta
+from random import shuffle
+
+from flask import request, session, redirect, url_for, abort, \
     render_template, flash, jsonify
 from google.appengine.ext.db import to_dict
 from application import app
-from models import Game, Player, GamePlayer, GameHistory, verify_password, hash_password, msg_generator
+from models import Game, Player, GamePlayer, GameHistory
 from decorators import crossdomain
-from random import shuffle
+from application.helpers import hash_password, verify_password, msg_generator
+
 
 """
 The functions below are the supported APIs
@@ -205,7 +208,6 @@ def kill():
 def get_game_status():
     info = {"target": None, "in_game": False, "game_exists": False, "msg": None, "player_exists": False, "game_completed": False, "time_left": None}
     try:
-        info["time_left"] = datetime.now()
         game = Game.get_by_id(int(request.args["game_id"]))
         if game is None:
             info["msg"] = "Game does not exists. "
@@ -231,7 +233,7 @@ def get_game_status():
         if to_kill_game_history is None:
             return jsonify(info)
         else:
-
+            info["time_left"] = to_kill_game_history.assign_date + timedelta(hours=1)
             info["target"] = to_kill_game_history.target.username
             info["msg"] = be_killed_game_history.confirm_msg
             return jsonify(info)
@@ -239,29 +241,6 @@ def get_game_status():
         # info["time_left"] = str(datetime.datetime.now())
         info["msg"] = "Something is fundamentally wrong. "
         return jsonify(info)
-
-
-# @app.errorhandler(404)
-# def not_found(error):
-#     return make_response(jsonify( { 'error': 'Not found' } ), 404)
-
-
-"""
-Helper functions to parse object for JSON returns
-"""
-
-
-def parse_game(game):
-    game_id = game.key().id_or_name()
-    gameInfo = {
-        'game_id': game_id,
-        'title': game.title,
-        'num_player': game.num_player,
-        'creation_date': game.creation_date,
-        'start_time': game.start_time,
-        'end_time': game.end_time,
-    }
-    return gameInfo
 
 
 """

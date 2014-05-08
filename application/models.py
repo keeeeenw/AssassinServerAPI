@@ -4,11 +4,9 @@ models.py
 App Engine datastore models
 
 """
-from random import shuffle, random, choice
-import string
 from google.appengine.ext import db
-import hashlib
-
+from helpers import hash_password, msg_generator
+from random import shuffle
 """
 Here are the models
 """
@@ -47,22 +45,6 @@ class GameHistory(db.Model):
     complete_time = db.DateTimeProperty()
 
 
-"""
-Helper functions
-"""
-
-
-def hash_password(password):
-    return hashlib.md5(password).hexdigest()
-
-
-def verify_password(password, hashed_password):
-    return hashlib.md5(password).hexdigest() == hashed_password
-
-
-def msg_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(choice(chars) for _ in range(size))
-
 
 """
 Let's create some fake data
@@ -70,6 +52,7 @@ Let's create some fake data
 
 
 def bootstrap():
+    cleanup()
     """
         Adding bootstrap model objects to the database
     """
@@ -119,5 +102,4 @@ def cleanup():
 
 # Using this because before_fist_request only registers one function
 if Game.all().get() is None:
-    cleanup()
     bootstrap()
