@@ -4,6 +4,7 @@ models.py
 App Engine datastore models
 
 """
+import string
 from google.appengine.ext import db
 from helpers import hash_password, msg_generator
 from random import shuffle
@@ -83,6 +84,11 @@ def bootstrap():
         else:
             cleanup()
             print("Error in seeding!")
+
+    names = ["Ken", "Rebecca", "Paul", "Sam", "Yulun"]
+    for name in names:
+        player = Player(username=name, password_hash=hash_password("p" + string.lower(name[0])))
+        player.put()
 
 
 def cleanup():
