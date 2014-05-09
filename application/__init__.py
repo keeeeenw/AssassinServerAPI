@@ -2,7 +2,7 @@
 #import sqlite3
 import os
 from flask import Flask
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 from werkzeug.debug import DebuggedApplication
 
 app = Flask('application')

@@ -2,11 +2,9 @@
 Taken from:  https://gist.github.com/1094140
 """
 
-import json
 from datetime import timedelta
 from functools import wraps, update_wrapper
-from flask import redirect, request, current_app, make_response, session
-from lib.werkzeug.exceptions import abort
+from flask import abort, redirect, request, current_app, make_response, session
 
 
 def login_required(func):
