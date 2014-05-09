@@ -5,7 +5,29 @@ Provides cloud support for the [Assassin's Game](http://en.wikipedia.org/wiki/As
 ## Architecture
 
 This repository includes the Python-based server engine. The server provides a REST API capable of both GET and POST requests.
-The server responds to GET requests with information about player and game status. The server updates data in the database (GAE Datastore) upon receiving POST requests.
+The server responds to GET requests with information about player and game status. For example, [/api/users/user_id] returns the following JSON object to the client:
+
+    {
+      "info": {
+        "creation_date": "Thu, 08 May 2014 20:35:25 GMT",
+        "end_time": null,
+        "num_player": 5,
+        "participants": "[u'u0', u'u3', u'u2', u'u4', u'u1']",
+        "start_time": null,
+        "success": true,
+        "survivors": [
+          "u1",
+          "u4",
+          "u0",
+          "u3",
+          "u2"
+        ],
+        "title": "Java"
+      },
+      "success": true
+    }
+
+The server updates data in the database (GAE Datastore) upon receiving POST requests.
 All responses from the server are in the JSON format.
 
 ## Client Service
