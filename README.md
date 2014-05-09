@@ -1,6 +1,7 @@
 # AssassinServerAPI
 
 Provides cloud support for the [Assassin's Game](http://en.wikipedia.org/wiki/Assassin_(game)). Helps players keep track of the progress of the game.
+Here is the link to the [client repo](https://github.com/snaden/assassinsFrontend).
 
 ## Architecture
 
@@ -10,18 +11,10 @@ The server responds to GET requests with information about player and game statu
     {
       "info": {
         "creation_date": "Thu, 08 May 2014 20:35:25 GMT",
-        "end_time": null,
         "num_player": 5,
         "participants": "[u'u0', u'u3', u'u2', u'u4', u'u1']",
-        "start_time": null,
         "success": true,
-        "survivors": [
-          "u1",
-          "u4",
-          "u0",
-          "u3",
-          "u2"
-        ],
+        "survivors": ["u1", "u4", "u0",],
         "title": "Java"
       },
       "success": true
