@@ -1,5 +1,7 @@
 # AssassinServerAPI
 
+Provides cloud support for the [Assassin's Game](http://en.wikipedia.org/wiki/Assassin_(game)).
+
 Testing Server Side API using Flask Framework for Assassin App
 
 (1) Which tutorials and resources you used?
