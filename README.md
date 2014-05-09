@@ -30,7 +30,7 @@ The server stores all the user information in a table and manages the login and 
 ## Server Development
 
 The server engine uses Python and Flask framework. You need pip to install the dependencies and you can install pip here: http://pip.readthedocs.org/en/latest/installing.html.
-After cloning the project and installing pip, you need to run the following command to install the dependency:
+After cloning the project and installing pip, you need to run the following command to install the dependency (the second command may require sudo permission):
 
     cd <project-directory>
     pip install -r requirements.txt -t lib
