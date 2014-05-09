@@ -42,7 +42,7 @@ You can deploy the server locally by running:
 
     python /<GAE-directory>/dev_appserver.py /<project-directory>
 
-You can find the native GAE admin panel by:
+You can find the native GAE admin panel here:
 
     http://localhost:8000
 
