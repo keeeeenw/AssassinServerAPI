@@ -17,64 +17,16 @@ The server stores all the user information in a table and manages the login and 
 The server engine uses Python and Flask framework. You need the Google AppEngine SDK to run the server locally or push the engine to production.
 Depending on the platform you are using, you can download the corresponding SDK from this link: https://developers.google.com/appengine/downloads.
 
+You can deploy the server locally by running:
 
+    python /directory_to_GAE/dev_appserver.py /directory_to_AssassinServerAPI
 
-    cd server
-    gem install bundler  # if not already installed
-    bundle
+You can find the native GAE admin panel by:
 
-To run the regression tests:
+    http://localhost:8000
 
-    rake test
+The server automatically seeds players on start-up with username admin and password default. Here are some of the curl requests you can use to see if the server is working.
 
-You can also run `guard` to automatically rerun tests when files are modified.
-
-To declare a test snow emergency:
-
-    bin/snow-alerts declare minneapolis snow_emergency start_time=2014-5-6
-
-Generated files go in `server/work/`. This includes both JSON files and the SQLite database the engine uses to track state between calls. (Note that the script automatically creates and migrates the database, so you do not need to install or configure a DB yourself.)
-
-To send any pending â€œmove your carâ€ notifications (requires valid config in `server/config/urbanairship.yml`):
-
-    bin/snow-alerts notify
-
-To clear all emergencies and start over:
-
-    rm work/alerts.db
-    bin/snow-alerts generate
-
-Run the `snow-alerts` script with no args for help.
-
-
-
-
-Testing Server Side API using Flask Framework for Assassin App
-
-(1) Which tutorials and resources you used?
-
-Google AppEngine Tutorial:
-
-https://developers.google.com/appengine/ 
-
-Flask Tutorial: 
-
-http://flask.pocoo.org/docs/tutorial/
-
-(2) What your code does?
-
-1. You can login using username 'admin' and password 'default' to add new games and view current games
-
-2. User call the server API, the server returns the content of Game model as JSON.
-
- You can access the API using "http://127.0.0.1:5000/api/list\_games if you are logged in.
-
- You could also use http://127.0.0.1:5000/api/list\_games?dev\_key=t6ra1M77Ei80b35LeV5I55EN7c
-if you do not want to log into the application
-
-3. The app is working on Google App Engine
-
-http://macassassingame.appspot.com
-http://www.raymondcamden.com/index.cfm/2012/6/21/Update-to-my-ServerBased-Login-PhoneGap-Demo
-
+    curl -X GET http://localhost:8080/api/games
+    curl -X GET http://localhost:8080/api/players
 
