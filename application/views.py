@@ -2,8 +2,6 @@ from datetime import datetime, timedelta
 from random import shuffle
 
 from flask import request, session, url_for, abort, flash, jsonify, render_template
-from google.appengine.ext.db import to_dict
-from application import app
 from models import Game, Player, GamePlayer, GameHistory
 from decorators import crossdomain
 from application.helpers import hash_password, verify_password, msg_generator, parse_game
