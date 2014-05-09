@@ -36,3 +36,4 @@ The server automatically seeds players on start-up with username admin and passw
     curl -X GET http://localhost:8080/api/games
     curl -X GET http://localhost:8080/api/players
 
+Instructions to deploy the server on Google Platform: https://developers.google.com/appengine/docs/python/getting-started-with-flask
