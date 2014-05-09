@@ -14,12 +14,18 @@ The server stores all the user information in a table and manages the login and 
 
 ## Server Development
 
-The server engine uses Python and Flask framework. You need the Google AppEngine SDK to run the server locally or push the engine to production.
+The server engine uses Python and Flask framework. You need pip to install the dependencies and you can install pip here: http://pip.readthedocs.org/en/latest/installing.html.
+After cloning the project and installing pip, you need to run the following command to install the dependency:
+
+    cd <project-directory>
+    pip install -r requirements.txt -t lib
+
+You need the Google AppEngine SDK to run the server locally or push the engine to production.
 Depending on the platform you are using, you can download the corresponding SDK from this link: https://developers.google.com/appengine/downloads.
 
 You can deploy the server locally by running:
 
-    python /directory_to_GAE/dev_appserver.py /directory_to_AssassinServerAPI
+    python /<GAE-directory>/dev_appserver.py /<project-directory>
 
 You can find the native GAE admin panel by:
 
